@@ -27,7 +27,7 @@ module T_Flip_Flop_t;
 // I/O signals
 reg clk = 1'b0;
 reg t = 1'b0;
-reg rst_n = 1'b1; //resets when 0
+reg rst_n = 1'b0; //initial clear
 wire q;
 
 // generate clock pulse
@@ -46,9 +46,15 @@ Toggle_Flip_Flop TFF(
 //      $fsdbDumpvars;
 // end
 
+
+//bruteforce to check all possible states
 initial begin
+    @(negedge clk) rst_n = 1'b1;
     @(negedge clk) t = 1'b1;
     @(negedge clk) t = 1'b0;
+    @(negedge clk) t = 1'b1;
+    @(negedge clk) t = 1'b0;
+    @(negedge clk) rst_n = 1'b0;//finally, reset
     @(negedge clk) $finish;
 end
 

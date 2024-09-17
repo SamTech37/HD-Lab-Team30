@@ -6,15 +6,14 @@ input t;
 input rst_n;
 output q;
 
-wire q0,t1,t2;
-wire nq0;
+wire q0,d,temp;
 
-MyXOR exor(t1, q0, t);
-and(t2, t1, rst_n);
-D_Flip_Flop dff(clk,t2,q0);
+MyXOR exor(.f(temp),.a(q0),.b(t));
+and(d,temp,rst_n);
+D_Flip_Flop dff(.clk(clk), .d(d), .q(q0) );
 
-not(nq0,q0);
-not(q,nq0);
+and(q, 1'b1, q0); //output q0 as q
+
 
 endmodule
 
@@ -34,7 +33,7 @@ and(t1, a, nb);
 and(t2, na, b);
 or(f, t1, t2);
 
-endmodule;
+endmodule
 
 // DFF with 2 D-latches, tested
 module D_Flip_Flop(clk, d, q);
