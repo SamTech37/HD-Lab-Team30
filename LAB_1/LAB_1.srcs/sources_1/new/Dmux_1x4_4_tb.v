@@ -25,7 +25,7 @@
 module Dmux_1x4_4bit_t;
 
 // I/O signals
-reg [3:0]in = 4'b0000;
+reg [3:0]in = 4'b0001;
 reg [1:0]sel = 2'b00;
 wire [3:0]a;
 wire [3:0]b;
@@ -33,12 +33,12 @@ wire [3:0]c;
 wire [3:0]d;
 
 Dmux_1x4_4bit d1(
-    .in(in)
+    .in (in),
     .sel (sel),
     .a (a),
     .b (b),
     .c (c),
-    .d (d),
+    .d (d)
 );
 
 // uncommment and add "+access+r" to your nverilog command to dump fsdb waveform on NTHUCAD
