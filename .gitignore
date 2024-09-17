@@ -6,3 +6,4 @@ LAB_1/LAB_1.sim
 #ignore all cache and sim (waveform) files
 **/*.cache/
 **/*.sim/
+**/*.runs/
