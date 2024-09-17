@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module Mux_2x1_4bit(in1, in2, sel, f);
 input [4-1:0] in1, in2;
-input [2-1:0] sel;
+input sel;
 output [4-1:0] f;
 wire [3:0] out1, out2;
 wire selbar;

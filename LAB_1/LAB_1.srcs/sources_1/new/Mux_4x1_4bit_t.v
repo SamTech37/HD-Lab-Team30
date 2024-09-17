@@ -4,10 +4,10 @@
 
 module Mux_4x1_4bit_t;
 reg [3:0]a = 4'b0000;
-reg [3:0]b = 4'b0000;
-reg [3:0]c = 4'b0000;
-reg [3:0]d = 4'b0000;
-reg [1:0]sel = 2'b00;
+reg [3:0]b = 4'b0010;
+reg [3:0]c = 4'b0100;
+reg [3:0]d = 4'b1000;
+reg [1:0]sel = 2'b0;
 wire [3:0]f;
 
 Mux_4x1_4bit m1(
@@ -20,10 +20,10 @@ Mux_4x1_4bit m1(
 );
 
 // uncommment and add "+access+r" to your nverilog command to dump fsdb waveform on NTHUCAD
-initial begin
-      $fsdbDumpfile("MUX.fsdb");
-      $fsdbDumpvars;
-end
+// initial begin
+//      $fsdbDumpfile("MUX.fsdb");
+//      $fsdbDumpvars;
+// end
 
 initial begin
     repeat (2 ** 3) begin
