@@ -23,13 +23,11 @@
 //testbench for TFF with rst_n
 //needs refinement
 module T_Flip_Flop_t;
-
 // I/O signals
 reg clk = 1'b0;
 reg t = 1'b0;
 reg rst_n = 1'b0; //initial clear
 wire q;
-
 // generate clock pulse
 always#(1) clk = ~clk;
 
@@ -39,14 +37,6 @@ Toggle_Flip_Flop TFF(
     .t(t), 
     .rst_n(rst_n)
 );
-
-// uncommment and add "+access+r" to your nverilog command to dump fsdb waveform on NTHUCAD
-// initial begin
-//      $fsdbDumpfile("DFF.fsdb");
-//      $fsdbDumpvars;
-// end
-
-
 //bruteforce to check all possible states
 initial begin
     @(negedge clk) rst_n = 1'b1;
@@ -57,6 +47,5 @@ initial begin
     @(negedge clk) rst_n = 1'b0;//finally, reset
     @(negedge clk) $finish;
 end
-
 
 endmodule

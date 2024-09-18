@@ -26,9 +26,6 @@ reg [4-1:0] in1 = 4'b0000, in2=4'b0001;
 reg control = 1'b0;
 wire [4-1:0] out1, out2;
 
-
-
-
 Crossbar_2x2_4bit cross2x2(
     .in1(in1),
     .in2(in2),
@@ -37,14 +34,6 @@ Crossbar_2x2_4bit cross2x2(
     .out2(out2)
 );
 
-// uncommment and add "+access+r" to    your nverilog command to dump fsdb waveform on NTHUCAD
-// initial begin
-//      $fsdbDumpfile("DFF.fsdb");
-//      $fsdbDumpvars;
-// end
-
-
-//bruteforce to check all possible states
 initial begin
     repeat (2**1) begin
         #1 control = ~control;
@@ -54,5 +43,4 @@ initial begin
     #1 $finish;
 end
 
-    
 endmodule
