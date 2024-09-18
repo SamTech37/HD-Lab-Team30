@@ -47,6 +47,7 @@ initial begin
         in3 = in3 + 1;
         in4 = in4 + 1;
     end
+    #1 $finish;
 end
 
 endmodule
