@@ -18,6 +18,10 @@ and(q, 1'b1, q0); //output q0 as q
 endmodule
 
 
+/*
+submodules used
+*/
+
 //gate-level stuff only
 module MyXOR(a, b, f);
 
