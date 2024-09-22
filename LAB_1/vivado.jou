@@ -1,0 +1,60 @@
+#-----------------------------------------------------------
+# Vivado v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 05:00:03 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Thu Sep 19 15:47:29 2024
+# Process ID: 52684
+# Current directory: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_1
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent49980 C:\NTHU\Sophomore_I\HardWare\hdl\HD-Lab-Team30\LAB_1\LAB_1.xpr
+# Log file: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_1/vivado.log
+# Journal file: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_1\vivado.jou
+# Running On: Samuel, OS: Windows, CPU Frequency: 2918 MHz, CPU Physical cores: 14, Host memory: 33982 MB
+#-----------------------------------------------------------
+start_gui
+open_project C:/NTHU/Sophomore_I/HardWare/Lab2/project_1/project_1.xpr
+update_compile_order -fileset sources_1
+set_property top NAND_Implement_t [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+set_property dataflow_viewer_settings "min_width=16"   [current_fileset]
+launch_simulation
+launch_simulation
+launch_simulation
+source NAND_Implement_t.tcl
+set_property top Majority_t [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+launch_simulation
+launch_simulation
+close_sim
+launch_simulation
+source Majority_t.tcl
+update_compile_order -fileset sources_1
+set_property top Adders_t [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+launch_simulation
+close_sim
+launch_simulation
+source Adders_t.tcl
+close_sim
+launch_simulation
+source Adders_t.tcl
+close_sim
+launch_simulation
+source Adders_t.tcl
+close_sim
+launch_simulation
+source Adders_t.tcl
+close_sim
+launch_simulation
+source Adders_t.tcl
+close_sim
+launch_simulation
+launch_simulation
+source Adders_t.tcl
+c7a35t_0]
+current_hw_device [get_hw_devices xc7a35t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {C:/Users/yoyus/project_temp/project_temp.runs/impl_1/Crossbar_2x2_4bit_fpga.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
