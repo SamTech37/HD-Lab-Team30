@@ -24,7 +24,8 @@ endmodule
 
 
 
-//remember to define the NAND implementations in another file.
+//remember to add the NAND implementations into this file
+//before submitting the code
 
 module Half_Adder(a, b, cout, sum);
 input a, b;
