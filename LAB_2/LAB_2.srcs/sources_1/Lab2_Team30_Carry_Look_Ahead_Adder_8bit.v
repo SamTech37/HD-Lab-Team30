@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-`timescale 1ns/1ps
 
 module NOT(out, a);
 input a;
@@ -75,12 +74,12 @@ input [3:0] a, b;
 output [3:0] p, g;
 AND A1(g[0], a[0], b[0]);
 OR O1(p[0], a[0], b[0]);
-AND A1(g[1], a[1], b[1]);
-OR O1(p[1], a[1], b[1]);
-AND A1(g[2], a[2], b[2]);
-OR O1(p[2], a[2], b[2]);
-AND A1(g[3], a[3], b[3]);
-OR O1(p[3], a[3], b[3]);
+AND A2(g[1], a[1], b[1]);
+OR O2(p[1], a[1], b[1]);
+AND A3(g[2], a[2], b[2]);
+OR O3(p[2], a[2], b[2]);
+AND A4(g[3], a[3], b[3]);
+OR O4(p[3], a[3], b[3]);
 endmodule
 
 //4bit CLA
@@ -141,5 +140,5 @@ wire c4;
 Carry_Look_Ahead_Gen_4bit CLA4_1(c0, a[3:0], b[3:0], g1, p1, s[3:0]);
 Carry_Look_Ahead_Gen_2bit CLA2_1(c0, g1, p1, c4);
 Carry_Look_Ahead_Gen_4bit CLA4_2(c4, a[7:4], b[7:4], g2, p2, s[7:4]);
-Carry_Look_Ahead_Gen_2bit CLA2_1(c4, g2, p2, c8);
+Carry_Look_Ahead_Gen_2bit CLA2_2(c4, g2, p2, c8);
 endmodule
