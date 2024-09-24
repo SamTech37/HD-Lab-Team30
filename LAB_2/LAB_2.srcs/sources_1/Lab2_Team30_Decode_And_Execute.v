@@ -250,10 +250,10 @@ output out;
 
 wire t1,t2;
 wire nsel;
-Not N1(nsel,sel);
+NOT N1(nsel,sel);
 
 AND A1(t1, a,nsel);
-And A2(t2, b,sel);
+AND A2(t2, b,sel);
 OR O1(out, t1,t2);
 endmodule
 

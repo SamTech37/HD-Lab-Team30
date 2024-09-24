@@ -63,14 +63,16 @@ endmodule
 
 //REMOVE these definitions before submitting
 
-//a 4-bit RCA
+//a faulty 4-bit RCA example
 module Ripple_Carry_Adder(a, b, cin, cout , sum);
 input [3:0] a, b;
 input cin;
 output [3:0] sum;
 output cout;
 wire [3:0] c;
-Full_Adder fa0(a[0],b[0],cin,c[0],sum[0]);
+
+//didn't add the carry-in, on purpose
+Full_Adder fa0(a[0],b[0], 0 ,c[0],sum[0]);
 Full_Adder fa1(a[1],b[1],c[0],c[1],sum[1]);
 Full_Adder fa2(a[2],b[2],c[1],c[2],sum[2]);
 Full_Adder fa3(a[3],b[3],c[2],cout,sum[3]);
