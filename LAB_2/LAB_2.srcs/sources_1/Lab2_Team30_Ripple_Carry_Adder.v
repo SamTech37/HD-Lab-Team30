@@ -10,14 +10,14 @@ output [8-1:0] sum;
 wire [8-1:0] c;
 
 Full_Adder fa0(a[0],b[0],cin,c[1],sum[0]);
-Full_Adder fa1(a[1],b[1],cin,c[2],sum[1]);
-Full_Adder fa2(a[2],b[2],cin,c[3],sum[2]);
-Full_Adder fa3(a[3],b[3],cin,c[4],sum[3]);
+Full_Adder fa1(a[1],b[1],c[1],c[2],sum[1]);
+Full_Adder fa2(a[2],b[2],c[2],c[3],sum[2]);
+Full_Adder fa3(a[3],b[3],c[3],c[4],sum[3]);
 
-Full_Adder fa4(a[4],b[4],cin,c[5],sum[4]);
-Full_Adder fa5(a[5],b[5],cin,c[6],sum[5]);
-Full_Adder fa6(a[6],b[6],cin,c[7],sum[6]);
-Full_Adder fa7(a[7],b[7],cin,cout,sum[7]);
+Full_Adder fa4(a[4],b[4],c[4],c[5],sum[4]);
+Full_Adder fa5(a[5],b[5],c[5],c[6],sum[5]);
+Full_Adder fa6(a[6],b[6],c[6],c[7],sum[6]);
+Full_Adder fa7(a[7],b[7],c[7],cout,sum[7]);
 
 
 endmodule
