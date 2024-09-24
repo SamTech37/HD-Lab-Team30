@@ -1,0 +1,15 @@
+#-----------------------------------------------------------
+# Vivado v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 05:00:03 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Tue Sep 24 00:22:26 2024
+# Process ID: 13360
+# Current directory: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_2
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent29192 C:\NTHU\Sophomore_I\HardWare\hdl\HD-Lab-Team30\LAB_2\LAB_2.xpr
+# Log file: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_2/vivado.log
+# Journal file: C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_2\vivado.jou
+# Running On: Samuel, OS: Windows, CPU Frequency: 2918 MHz, CPU Physical cores: 14, Host memory: 33982 MB
+#-----------------------------------------------------------
+start_gui
+open_project C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_2/LAB_2.xpr
+update_compile_order -fileset sources_1
