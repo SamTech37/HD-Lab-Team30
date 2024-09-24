@@ -19,8 +19,8 @@ Ripple_Carry_Adder RCA(
 initial begin
     repeat (2**3) begin
         #1 cin=~cin;
-        a = a + 3;
-        b = b + 2;
+        a = (a << 2) + 1;//right shift 2-bits then add 1
+        b = (b << 1) + 1;
     end
     #1 $finish;
 end
