@@ -48,12 +48,11 @@ initial begin
         #4
         {a,b,cin} = {a,b,cin} + 1'b1;
     end
-    
-    
-    //setting the done signal
+    //set the done signal when done
     done = 1'b1;
-    //for 5ns only
-    #5 done = 1'b0;
+    
+    #1 error = 1'b0; //clear the last error (if any)
+    #4 done = 1'b0; //and finally, clear done signal
     
     //do not use "finish" in this testbench
 end

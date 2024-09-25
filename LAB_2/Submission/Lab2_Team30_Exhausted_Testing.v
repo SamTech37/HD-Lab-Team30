@@ -29,30 +29,25 @@ Ripple_Carry_Adder rca(
     .sum (sum)
 );
 
-initial begin
-    // design you test pattern here.
-    // Remember to set the input pattern to the test instance every 5 nanasecond
-    // Check the output and set the `error` signal accordingly 1 nanosecond after new input is set.
-    // Also set the done signal to 1'b1 for 5 nanoseconds after the test is finished.
-    
+initial begin  
     //iterate through all 2^9 = 512 cases
     //takes 512 * 5 = 2560ns
     repeat (2**9) begin
         
         //check output
-        //raise error if the sum or cout is not correct
+        //raise error if the cout or sum is incorrect
         #1 
         error = ( {cout,sum} != a+b+cin )?1:0;
-        
+
         //set next input pattern   
         #4
         {a,b,cin} = {a,b,cin} + 1'b1;
     end
-    //setting the done signal
+    //set the done signal when done
     done = 1'b1;
-    //for 5ns only
-    #5 done = 1'b0;
     
+    #1 error = 1'b0; //clear the last error (if any)
+    #4 done = 1'b0; //and finally, clear done signal
 end
 
 endmodule
@@ -60,4 +55,3 @@ endmodule
 
 //REMOVE these definitions bellow before submitting
 //a faulty 4-bit RCA example
-
