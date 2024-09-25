@@ -45,7 +45,7 @@ module Lab2_Team30_Decode_And_Execute_fpga(rs, rt, sel, LEDout);
         4'b1101: LEDout = 7'b1000010; // "d" 
         4'b1110: LEDout = 7'b0110000; // "E" 
         4'b1111: LEDout = 7'b0111000; // "F" 
-        default: LED_out = 7'b0000001; // "0"
+        default: LEDout = 7'b0000001; // "0"
         endcase
     end
 endmodule
