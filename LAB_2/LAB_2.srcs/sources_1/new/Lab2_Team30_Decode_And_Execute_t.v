@@ -3,8 +3,8 @@
 
 module Decode_And_Execute_T();
 // I/O signals
-reg [4-1:0] rs = 4'b0000, rt = 4'b0000;
-reg [3-1:0] sel = 3'b000;
+reg [4-1:0] rs, rt ;
+reg [3-1:0] sel;
 wire [4-1:0] rd;
 
 
@@ -13,9 +13,10 @@ Decode_And_Execute DnE(
 );
 
 initial begin
-    
+    rs = 4'b0000;
+    rt = 4'b0000;
+    sel = 3'b000;
     repeat (4) begin
-        
         
         rs = rs + 3;
         rt = rt + 5;
