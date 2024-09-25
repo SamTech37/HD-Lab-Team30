@@ -20,11 +20,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Lab2_Team30_Decode_And_Execute_fpga(rs, rt, sel, LEDout);
+module Lab2_Team30_Decode_And_Execute_fpga(rs, rt, sel, LEDout, an);
     input [3:0] rs, rt;
     input [2:0] sel;
     output reg [6:0] LEDout;
-    reg [3:0] rd;
+    output [3:0] an;
+    and a1(an[3], 1, 1);
+    and a2(an[2], 1, 1);
+    and a3(an[1], 1, 1);
+    and a4(an[0], 0, 0);
+    wire [3:0] rd;
     Decode_And_Execute DAE1(rs, rt, sel, rd);
     always @(*)
     begin
