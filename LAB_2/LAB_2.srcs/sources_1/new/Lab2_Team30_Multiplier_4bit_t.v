@@ -28,17 +28,12 @@ wire [8-1:0] p;
 //test instance
 Multiplier_4bit mul(.a(a), .b(b), .p(p));
 
-
-
-//test codes
-
-
+//run through all possible cases
 initial begin
 
-repeat (15) begin
+repeat (2**8) begin
     #5 
-    a = a+1;
-    b = b+1;
+    {a,b} = {a,b}+1'b1;
 end
 
 #1 $finish;
