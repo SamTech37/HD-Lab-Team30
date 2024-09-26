@@ -54,19 +54,19 @@ OR O1(out, temp1, temp2);
 endmodule
 
 
-module Half_Adder(a, b, cout, sum);
+module HHalf_Adder(a, b, cout, sum);
 input a, b;
 output cout, sum;
 XOR XO1(sum, a, b);
 AND A1(cout, a, b);
 endmodule
 
-module Full_Adder (a, b, cin, sum);
+module FFull_Adder (a, b, cin, sum);
 input a, b, cin;
 output sum;
 wire tempc, temps, tc;
-Half_Adder H1(a, b, tempc, temps);
-Half_Adder H2(cin, temps, tc, sum);
+HHalf_Adder H1(a, b, tempc, temps);
+HHalf_Adder H2(cin, temps, tc, sum);
 endmodule
 
 module PG_Produce(a, b, p, g);
@@ -93,18 +93,18 @@ PG_Produce PP1(a, b, p, g);
 wire t0, t1, t2, t3;
 //Produce C1
 AND A1(t0, p[0], c);
-OR O1(c[1], g[0], t1);
+OR O1(cout[1], g[0], t0);
 //Produce C2
-AND A2(t1, p[1], c[1]);
-OR O2(c[2], g[1], t1);
+AND A2(t1, p[1], cout[1]);
+OR O2(cout[2], g[1], t1);
 //Produce C3
-AND A2(t2, p[2], c[2]);
-OR O2(c[3], g[2], t2);
+AND A3(t2, p[2], cout[2]);
+OR O3(cout[3], g[2], t2);
 //Produce [3:0]sum
-Full_Adder FA1(a[0], b[0], c, s[0]);
-Full_Adder FA2(a[1], b[1], c[1], s[1]);
-Full_Adder FA3(a[2], b[2], c[2], s[2]);
-Full_Adder FA4(a[3], b[3], c[3], s[3]);
+FFull_Adder FA1(a[0], b[0], c, s[0]);
+FFull_Adder FA2(a[1], b[1], cout[1], s[1]);
+FFull_Adder FA3(a[2], b[2], cout[2], s[2]);
+FFull_Adder FA4(a[3], b[3], cout[3], s[3]);
 endmodule
 
 module Carry_Look_Ahead_Gen_2bit(cin, g, p, cout);
@@ -125,7 +125,7 @@ OR O1(o1, g[3], t3);
 OR O2(o2, t4, t6);
 OR O3(gg, o1, o2);
 //cg
-AND A1(t7, pg, cin);
+AND A9(t7, pg, cin);
 OR O4(cout, t7, gg);
 endmodule
 
