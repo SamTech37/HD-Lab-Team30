@@ -169,7 +169,7 @@ output [3:0] rd;
 AND A1(rd[0], rt[1], 1);
 AND A2(rd[1], rt[2], 1);
 AND A3(rd[2], rt[3], 1);
-AND A4(rd[3], rt[0], 1);
+AND A4(rd[3], rt[3], 1);
 endmodule
 
 module Left_Shift(rs, rd);
