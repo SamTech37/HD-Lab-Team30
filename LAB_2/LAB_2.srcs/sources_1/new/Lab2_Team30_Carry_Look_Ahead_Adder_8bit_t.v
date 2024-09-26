@@ -29,13 +29,18 @@ wire [8-1:0] s;
 wire cout;
 
 Carry_Look_Ahead_Adder_8bit CLA_8bit(.a(a), .b(b), .c0(cin), .s(s), .c8(cout));
-
+reg error = 1'b0;
 initial begin
-    repeat (2**3) begin
-        #1 cin=~cin;
-        a = (a << 2) + 1;//right shift 2-bits then add 1
-        b = (b << 1) + 1;
+    //make sure the module works under all cases, bitwise.
+    repeat (2**17) begin
+        #1
+        //raise error if cout and sum doesn't check out
+        error = !( a+b+cin === {cout,s});
+        #1
+        //next input pattern
+        {a,b,cin} = {a,b,cin}+ 1'b1;
     end
+    
     #1 $finish;
 end
 endmodule

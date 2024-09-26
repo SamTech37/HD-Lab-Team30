@@ -17,6 +17,7 @@ initial begin
     //make sure the module works under all cases, bitwise.
     repeat (2**17) begin
         #1
+        //raise error if cout and sum doesn't check out
         error = !( a+b+cin === {cout,sum});
         #1
         //next input pattern
@@ -25,5 +26,4 @@ initial begin
     
     #1 $finish;
 end
-
 endmodule
