@@ -28,11 +28,17 @@ wire [8-1:0] p;
 //test instance
 Multiplier_4bit mul(.a(a), .b(b), .p(p));
 
+
+reg error = 1'b0;
 //run through all possible cases
 initial begin
 
 repeat (2**8) begin
-    #5 
+    
+    #1
+    error = !(p===a*b);
+
+    #1 
     {a,b} = {a,b}+1'b1;
 end
 
