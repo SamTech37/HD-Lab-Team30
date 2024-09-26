@@ -1,12 +1,10 @@
 `timescale 1ns/1ps
 
-
 module Decode_And_Execute_T();
 // I/O signals
 reg [4-1:0] rs, rt ;
 reg [3-1:0] sel;
 wire [4-1:0] rd;
-
 
 Decode_And_Execute DnE(
     .rs(rs), .rt(rt), .sel(sel), .rd(rd)  
@@ -30,3 +28,4 @@ initial begin
 end
 
 endmodule
+
