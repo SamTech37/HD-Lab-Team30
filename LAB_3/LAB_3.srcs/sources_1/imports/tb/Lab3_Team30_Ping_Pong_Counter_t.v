@@ -2,26 +2,35 @@
 
 module Ping_Pong_Counter_T();
 // I/O signals
-reg clk, rst_n;
-reg enable;
+reg clk = 1'b1, rst_n = 1'b1;
+reg enable = 1'b1;
 wire direction;
 wire [4-1:0] out;
 
 //test instance
-Ping_Pong_Counter (.clk(clk), .rst_n(rst_n), .enable(enable), .direction(direction), .out(out));
+Ping_Pong_Counter counter(.clk(clk), .rst_n(rst_n), .enable(enable), .direction(direction), .out(out));
+
+// clock generation
+parameter cyc = 10;
+always#(cyc/2)clk = !clk;
 
 
-//run through all possible cases
-reg error = 1'b0;
+
 initial begin
-
-repeat (2**8) begin
+    //initialize
+    @ (negedge clk)
+    rst_n = 1'b0;
+    enable = 1'b1;
+    @ (negedge clk)
+	rst_n = 1'b1;
+	
+	@ (negedge clk)
+	repeat(2**2) begin
+    #(cyc * 13) enable = 1'b0;
+    #(cyc * 3) enable = 1'b1;
+	end
     
-    //raise error if the count is not correct
-    
-end
-
-#1 $finish;
+    #(cyc) $finish;
 end
 
 
