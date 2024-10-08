@@ -11,16 +11,11 @@ output reg [4-1:0] out;
 
 reg next_count; //1 up, 0 down
 
-
-
-
-
 //seq block
 always @(posedge clk) begin
     if(!rst_n) begin //reset
         out <= min;
         direction <= 1'b1;
-        next_count <= 1'b1;
     end
     else if(enable && max>min && out<=max && out>=min) begin
     //counter is enabled and in range
