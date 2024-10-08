@@ -9,34 +9,30 @@ input [4-1:0] min;
 output reg direction;
 output reg [4-1:0] out;
 
-
-//[TODO]
-//handle enable
-//handle max & min & out-of-range
-//handle flip 
+reg next_count; //1 up, 0 down
 
 //seq block
 always @(posedge clk) begin
     if(!rst_n) begin //reset
         out <= min;
-        direction = 1'b1;
-    end 
-    else if(enable && max>min) begin
-        if(direction) begin
-        out <= (out == max)? out-1 : out+1;
-        direction <= (out == max || flip)? !direction : direction;
-        end
-        else begin
-        out <= (out == min)? out+1 : out-1;
-        direction <= (out == min || flip)? !direction : direction;
-        end
+        direction <= 1'b1;
+    end
+    else if(enable && max>min && out<=max && out>=min) begin
+    //counter is enabled and in range
+        out <= (next_count)? out+1 : out-1;
+        direction <= next_count;
     end
     else 
-        out <= out; // do nothing when disabled
-        
+        out <= out; // hold value when disabled, out-of-range 
 end
 
-
 //comb block
+always @(*) begin
+    if(next_count)
+        next_count = (out == max || flip)? 1'b0 : 1'b1;
+    else
+        next_count = (out == min || flip)? 1'b1 : 1'b0;
+end
+
 
 endmodule
