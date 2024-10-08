@@ -12,7 +12,7 @@ Ping_Pong_Counter counter(.clk(clk), .rst_n(rst_n), .enable(enable), .direction(
 
 // clock generation
 parameter cyc = 10;
-always#(cyc/2)clk = !clk;
+always#(cyc/2) clk = !clk;
 
 
 
