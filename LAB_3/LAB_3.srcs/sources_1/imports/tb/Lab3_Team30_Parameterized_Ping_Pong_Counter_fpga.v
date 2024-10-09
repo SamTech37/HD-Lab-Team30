@@ -1,26 +1,26 @@
 `timescale 1ns / 1ps
 
 module Parameterized_Ping_Pong_Counter_fpga (clk, rst_n, enable, flip, max, min,
- dirLED, outLED1,outLED2,an);
+ outLED,an);
 // I/O signals
 input clk, rst_n;
 input enable;
 input flip;
 input [4-1:0] max;
 input [4-1:0] min;
-//7-seg display 1 & 0
-output reg [7-1:0]dirLED;
-//7-seg display 3 & 2
-output reg [7-1:0] outLED1;
-output reg [7-1:0] outLED2;
 output reg [3-1:0] an;
+output reg [7-1:0] outLED;//7-seg 
 
-wire rst_n_processed, flip_processed;
+
+reg [7-1:0] dirLED;//7-seg display 1 & 0
+reg [7-1:0] outLED1, outLED2;//7-seg display 3 & 2
+
+wire rst_n_in, flip_in;//debounce & one-pulse for button input
 wire direction;
 wire [4-1:0] out;
 wire clk_2_17; //clk rate divided by 2^17
 
-//debounce & one-pulse for button input
+
 
 //module
 Parameterized_Ping_Pong_Counter ppp_counter (
@@ -56,16 +56,42 @@ always @(posedge clk) begin
     default: outLED1 <= 7'b0000001; // "0"
     endcase
 
-    case(direction)//need to change
-    1'b0:  dirLED <= 7'b1111000;
+    case(direction)
+    1'b0:  dirLED <= 7'b1111000; //the bottom 3 segs
     1'b1: dirLED <= 7'b0001111;
     default: dirLED <= 7'b0001111; //the top 3 segs
     endcase
 end
 
 //display 4-digits concurently
+reg [2-1:0]display_digit;
 always @(posedge clk_2_17) begin
-    
+    case (display_digit) 
+    2'b00: begin
+        outLED = outLED1;
+        an = 4'b0111;
+        display_digit <= 2'b01;
+    end
+    2'b01: begin
+        outLED = outLED2;
+        an = 4'b1011;
+        display_digit <= 2'b10;
+    end
+
+    2'b10:
+    2'b11: begin
+        outLED = dirLED;
+        an = 4'b1100;
+        display_digit <= 2'b00;
+    end
+
+    default: begin
+        outLED = dirLED;
+        an = 4'b1111;
+        display_digit <= 2'b00; //reset display cycle
+    end
+    endcase
+
 end
 
 endmodule
@@ -77,15 +103,21 @@ endmodule
 //one-pulse
 
 //clock divider for time-multiplexing
-module Clock_Divider(clk, clk_2_17);
-input clk;
+module Clock_Divider(clk, rst_n, clk_2_17);
+input clk,rst_n;
 output reg clk_2_17;
 
 reg [17-1:0] cnt; //17-bit counter
 
 always @(posedge clk) begin
+    if(!rst_n) begin
+        cnt <= 17'b0;
+        clk_2_17 <= 1'b0;
+    end
+    else begin
         cnt <= (cnt == 17'h1ffff)? 17'b0 : cnt+1;
         clk_2_17 <= (cnt == 17'h1ffff)? 1'b1 : 1'b0;
+    end
 end
 
 endmodule
