@@ -30,10 +30,15 @@ end
 
 //comb block
 always @(*) begin
-    if(next_count)
-        next_count = (out == max || flip)? 1'b0 : 1'b1;
+    if(out == max)
+        next_count = 1'b0;
+    else if(out == min)
+        next_count = 1'b1;
+    else if (flip)
+        next_count = !direction;
     else
-        next_count = (out == min || flip)? 1'b1 : 1'b0;
+        next_count = direction;
+        
 end
 
 

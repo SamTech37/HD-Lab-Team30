@@ -10,7 +10,7 @@ input enable;
 input flip;
 input [4-1:0] max;
 input [4-1:0] min;
-output reg [3-1:0] an;
+output reg [4-1:0] an;
 output reg [7-1:0] outLED;//7-seg 
 
 

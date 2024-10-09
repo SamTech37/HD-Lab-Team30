@@ -42,20 +42,20 @@ initial begin
     rst_n = 1'b0;
     enable = 1'b1;
     min = 4'd2;
-    max = 4'd10;
+    max = 4'd8;
     @ (negedge clk)
 	rst_n = 1'b1;
 	
 	//counting up & down
-	#(cyc*16)
-	max = 4'd9;
-	#(cyc*4)
-	min = 4'd3;
+	#(cyc*8)
+	max = 4'd6;
+	#(cyc*2)
+	min = 4'd0;
 	
-	#(cyc*16)
 	//test disable
-	enable = 1'b0;
-	#(cyc*4) enable = 1'b1;
+	#(cyc*8)
+	enable = 1'b0; 
+	#(cyc*4) enable = 1'b1; 
 	
 	//test flip
     @ (negedge clk)
@@ -64,6 +64,13 @@ initial begin
 	@ (negedge clk)
 	#(cyc*4) flip = 1'b1;
 	#(cyc*4) flip = 1'b0;
+	
+	#(cyc*4) 
+	@ (negedge clk)
+	flip = 1'b1;
+	#(cyc) flip = 1'b0;
+	#(cyc) flip = 1'b1;
+	#(cyc) flip = 1'b0;
 	
 	//test out of range
     @ (negedge clk)
