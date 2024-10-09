@@ -10,7 +10,7 @@ output reg error;
 
 reg [3-1:0] write_pointer;
 reg [3-1:0] read_pointer;
-reg [8-1:0] FIFO [3-1:0];
+reg [8-1:0] FIFO [8-1:0];
 
 always @(posedge clk) begin
     if(!rst_n) begin
@@ -24,17 +24,18 @@ always @(posedge clk) begin
     //read operation(not empty)
         if(ren && write_pointer != read_pointer) begin
             dout <= FIFO[read_pointer];
+            $display("ride_pointer = %d, rp = %d", read_pointer, FIFO[read_pointer]);
             read_pointer <= read_pointer + 1;
             error <= 0;
         end
     //write operation(not full)
-        else if(wen && write_pointer != read_pointer-1) begin
+        else if(wen && write_pointer != read_pointer-1 && ren == 1'b0) begin
             FIFO[write_pointer] <= din;
+            //$display("write_pointer = %d, wp = %d", write_pointer, FIFO[write_pointer-1]);
             write_pointer <= write_pointer + 1;
             error <= 0;
         end
         else error <= 1;
     end
-    $display("write_pointer = %d, read_pointer = %d", write_pointer, read_pointer);
 end
 endmodule

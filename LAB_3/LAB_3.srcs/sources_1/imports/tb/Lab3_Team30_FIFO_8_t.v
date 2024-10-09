@@ -2,7 +2,7 @@
 
 module FIFO_T();
 // I/O signals
-reg clk = 1'b0, rst_n = 1'b1, wen = 1'b1, ren = 1'b0;
+reg clk = 1'b0, rst_n = 1'b1, wen = 1'b0, ren = 1'b0;
 reg [8-1:0]din = 8'b00000001;
 wire [8-1:0] dout;
 wire error;
@@ -34,7 +34,7 @@ initial begin
     @ (negedge clk) //for read (4 cycles -> 4 numbers)
     ren = 1'b1;
     wen = 1'b1;
-    #(cyc * 4)
+    #(cyc * 5)
 
     @ (negedge clk) //clear data
     rst_n = 1'b0;
