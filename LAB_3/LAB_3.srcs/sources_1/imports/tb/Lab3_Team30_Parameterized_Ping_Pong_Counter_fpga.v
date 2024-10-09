@@ -17,6 +17,8 @@ output reg [7-1:0] outLED;//7-seg
 reg [7-1:0] dirLED;//7-seg display 1 & 0
 reg [7-1:0] cntLED1, cntLED2;//7-seg display 3 & 2
 
+
+reg [2-1:0]display_digit;
 wire rst_n_deb, flip_deb; //debounced
 wire rst_n_in, flip_in; //debounced + onepulsed
 wire direction;
@@ -29,7 +31,7 @@ wire clk_2_17, clk_2_27; //clk rate divided by 2^17 & 2^27
 Debounce deb1(clk, rst_n, rst_n_deb);
 Debounce deb2(clk, flip, flip_deb);
 OnePulse op1(clk,  rst_n_deb, rst_n_in);
-OnePulse op2(clk,  flip_deb, flip_n_in);
+OnePulse op2(clk,  flip_deb, flip_in);
 
 //clock divider
 Clock_Divider cd(clk, rst_n_in, clk_2_17, clk_2_27);
@@ -38,7 +40,7 @@ Clock_Divider cd(clk, rst_n_in, clk_2_17, clk_2_27);
 //counter module
 //should count in an observable frequency
 Parameterized_Ping_Pong_Counter ppp_counter (
-    .clk(clk_2_27),
+    .clk(clk),
     .rst_n(rst_n_in),
     .enable(enable),
     .flip(flip_in),
@@ -129,7 +131,6 @@ always @(posedge clk) begin case(out)
 end
 
 //display 4-digits concurently
-reg [2-1:0]display_digit;
 always @(posedge clk_2_17) begin
     case (display_digit) 
     2'b00: begin
