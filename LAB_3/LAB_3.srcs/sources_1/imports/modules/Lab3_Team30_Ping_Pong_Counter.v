@@ -22,8 +22,10 @@ always @(posedge clk) begin
         out <= (next_count)? out+1 : out-1;
         direction <= next_count;
     end
-    else 
-        out <= out; // do nothing
+    else begin
+        out <= out; // do nothing when disabled
+        direction <= direction;
+    end
 end
 
 //comb block
