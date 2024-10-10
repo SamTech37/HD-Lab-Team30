@@ -31,7 +31,7 @@ end
 //comb block
 always @(*) begin
     if(out == max_count)
-        next_count 1'b0;
+        next_count = 1'b0;
     else if(out == min_count)
         next_count = 1'b1;
     else 
