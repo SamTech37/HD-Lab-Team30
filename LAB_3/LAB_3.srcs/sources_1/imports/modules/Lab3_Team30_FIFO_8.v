@@ -24,7 +24,7 @@ always @(posedge clk) begin
     //read operation(not empty)
         if(ren && write_pointer != read_pointer) begin
             dout <= FIFO[read_pointer];
-            $display("ride_pointer = %d, rp = %d", read_pointer, FIFO[read_pointer]);
+            //$display("ride_pointer = %d, rp = %d", read_pointer, FIFO[read_pointer]);
             read_pointer <= read_pointer + 1;
             error <= 0;
         end

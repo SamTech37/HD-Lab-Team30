@@ -58,9 +58,6 @@ initial begin
     #(cyc)
     raddr = 11'b00100000001;
     waddr = 11'b00110000010;
-    #(cyc)
-    raddr = 11'b00110000001;
-    waddr = 11'b00111000000;
 
 	@ (negedge clk)
     //ren = 1, wen = 1, read and write same memory
@@ -68,9 +65,9 @@ initial begin
     raddr = 11'b00110000010;
     waddr = 11'b00110000010;
     #(cyc)
-    raddr = 11'b00111000000;
-    waddr = 11'b00111000000;
-    
+    raddr = 11'b00110000001;
+    waddr = 11'b00110000001;
+    #(cyc*4)
     #(cyc) $finish;
 end
 endmodule
