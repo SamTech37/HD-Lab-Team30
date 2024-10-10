@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 
 
-// maybe consider spliting input, main feature & output into serveral clock cycles
-// clock rate of FPGA = 100 MHz = 1e8 Hz, namely, 10 ns per cycle
-module Parameterized_Ping_Pong_Counter_fpga (clk, rst_n, enable, flip, max, min, outLED, an);
+// revised version
+module Parameterized_Ping_Pong_Counter_fpga (clk, reset, enable, flip, max, min, outLED, an);
 // I/O signals
-input clk, rst_n;
+input clk; // clock rate 100 MHz = 1e8 Hz, namely, 10 ns per cycle
+input reset; // 1 when button pushed, 0 when not
 input enable;
 input flip;
 input [4-1:0] max;
@@ -14,34 +14,36 @@ output reg [4-1:0] an;
 output reg [7-1:0] outLED;//7-seg 
 
 
+wire reset_deb, flip_deb; //debounced
+wire reset_in, flip_in; //debounced + onepulsed
+wire direction;
+wire [4-1:0] out;
+reg [2-1:0] display_digit;
 reg [7-1:0] dirLED;//7-seg display 1 & 0
 reg [7-1:0] cntLED1, cntLED2;//7-seg display 3 & 2
 
-
-reg [2-1:0]display_digit;
-wire rst_n_deb, flip_deb; //debounced
-wire rst_n_in, flip_in; //debounced + onepulsed
-wire direction;
-wire [4-1:0] out;
-wire clk_2_17, clk_2_27; //clk rate divided by 2^17 & 2^27
-//about 1.3ms & 1.3s for time-multiplexing
+wire rst_n; //active-low reset for submodules
+wire clk_2_17,clk_2_26; // 100MHz slowed down to 1.3KHz & 2.6Hz
 
 
-//debounce & one-pulse for button input
-Debounce deb1(clk, rst_n, rst_n_deb);
-Debounce deb2(clk, flip, flip_deb);
-OnePulse op1(clk,  rst_n_deb, rst_n_in);
-OnePulse op2(clk,  flip_deb, flip_in);
+
 
 //clock divider
-Clock_Divider cd(clk, rst_n_in, clk_2_17, clk_2_27);
+Clock_Divider cd(clk, rst_n, clk_2_17,clk_2_26);
 
+//debounce & one-pulse for button input
+Debounce deb1(!clk, reset, reset_deb); //maybe invert the clocks to stablize?
+OnePulse op1(!clk,  reset_deb, reset_in);
+
+Debounce deb2(clk, flip, flip_deb);
+OnePulse op2(clk, flip_deb, flip_in); 
+assign rst_n = !reset_in;
 
 //counter module
-//should count in an observable frequency
-Parameterized_Ping_Pong_Counter ppp_counter (
+Parameterized_Ping_Pong_Counter_Slowed ppp_counter (
     .clk(clk),
-    .rst_n(rst_n_in),
+    .slow_clk(clk_2_26),//should count in an observable frequency (0.5s~1s per count)
+    .rst_n(rst_n),
     .enable(enable),
     .flip(flip_in),
     .max(max),
@@ -50,8 +52,9 @@ Parameterized_Ping_Pong_Counter ppp_counter (
     .out(out)
 );
 
-//7-seg display output 
-always @(posedge clk) begin case(out)  
+//7-seg display output logic
+always @(direction or out) begin
+    case(out)  
     4'b0000:begin
         cntLED1 <= 7'b0000001; // "0"
         cntLED2 <= 7'b0000001; // "0"
@@ -120,7 +123,6 @@ always @(posedge clk) begin case(out)
         cntLED1 <= 7'b0000001; // "0"
         cntLED2 <= 7'b0000001; // "0"
     end
-
     endcase
 
     case(direction)
@@ -132,14 +134,17 @@ end
 
 //display 4-digits concurently
 always @(posedge clk_2_17) begin
+    if (!rst_n)
+        display_digit <= 2'b00;
+    else  
     case (display_digit) 
     2'b00: begin
-        outLED <= cntLED1;
+        outLED <= cntLED2;
         an <= 4'b0111;
         display_digit <= 2'b01;
     end
     2'b01: begin
-        outLED <= cntLED2;
+        outLED <= cntLED1;
         an <= 4'b1011;
         display_digit <= 2'b10;
     end
@@ -177,7 +182,7 @@ assign pb_debounced = (DFF == 4'b1111)? 1'b1 : 1'b0;
 endmodule
 
 
-//one-pulse
+//one-pulse, the signal will be up for exactly one clock cycle
 module OnePulse(clk,  pb_debounced, pb_onepulse);
 
 input clk, pb_debounced;
@@ -191,32 +196,75 @@ end
 endmodule
 
 
-//clock divider for time-multiplexing
-module Clock_Divider(clk, rst_n, clk_2_17, clk_2_27);
+//clock divider for time-multiplexing 7-seg display & slowing down counter
+module Clock_Divider(clk, rst_n, clk_2_17,clk_2_26);
 input clk,rst_n;
-output reg clk_2_17;
-output reg clk_2_27;
+output reg clk_2_17, clk_2_26;
 
 reg [17-1:0] cnt_17; //17-bit counter
-reg [27-1:0] cnt_27; //27-bit counter
+reg [26-1:0] cnt_26; //26-bit counter
 
 always @(posedge clk) begin
     if(!rst_n) begin
         cnt_17 <= 17'b0;
         clk_2_17 <= 1'b0;
-        cnt_27 <= 27'b0;
-        clk_2_27 <= 1'b0;
+        cnt_26 <= 26'b0;
+        clk_2_26 <= 1'b0;
     end
     else begin
         cnt_17 <= cnt_17+1;
-        clk_2_17 <= (cnt_17 == 17'h1ffff)? 1'b1 : 1'b0;
-        cnt_27 <=  cnt_27+1;
-        clk_2_27 <= (cnt_27 == 27'h7fffff)? 1'b1 : 1'b0;
+        clk_2_17 <= (cnt_17 == 17'h1_ffff)? 1'b1 : 1'b0;
+        cnt_26 <= cnt_26+1;
+        clk_2_26 <= (cnt_26 == 26'h6f_ffff)? 1'b1 : 1'b0;
     end
 end
 
 endmodule
 
 
-//parametrized ping ping counter
+//parametrized ping ping counter, slowed
+module Parameterized_Ping_Pong_Counter_Slowed (clk, slow_clk, rst_n, enable, flip, max, min, direction, out);
+input clk;
+input slow_clk;
+input rst_n;
+input enable;
+input flip;
+input [4-1:0] max;
+input [4-1:0] min;
+output reg direction;
+output reg [4-1:0] out;
+
+reg next_count; //1 up, 0 down
+
+
+//seq block
+always @(posedge clk) begin
+    if(!rst_n) begin //rst_n
+        out <= min;
+        direction <= 1'b1;
+    end
+    else if(slow_clk&& enable && max>min && out<=max && out>=min) begin
+    //counter is enabled and in range
+        out <= (next_count)? out+1 : out-1;
+        direction <= next_count;
+    end
+    else begin // hold value when disabled or out-of-range 
+        out <= out; 
+        direction <= direction;
+    end
+end
+
+//comb block
+always @(*) begin
+    if(out == max)
+        next_count = 1'b0;
+    else if(out == min)
+        next_count = 1'b1;
+    else if (flip)
+        next_count = !direction;
+    else
+        next_count = direction;
+        
+end
+endmodule
 
