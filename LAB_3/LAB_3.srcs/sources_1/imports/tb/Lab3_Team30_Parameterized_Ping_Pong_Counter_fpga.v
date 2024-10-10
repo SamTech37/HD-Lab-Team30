@@ -32,15 +32,17 @@ wire clk_2_17,clk_2_26; // 100MHz slowed down to 1.3KHz & 2.6Hz
 Clock_Divider cd(clk, rst_n, clk_2_17,clk_2_26);
 
 //debounce & one-pulse for button input
-Debounce deb1(clk, reset, reset_deb);
+Debounce deb1(!clk, reset, reset_deb); //maybe invert the clocks to stablize?
+OnePulse op1(!clk,  reset_deb, reset_in);
+
 Debounce deb2(clk, flip, flip_deb);
-OnePulse op1(clk_2_26,  reset_deb, reset_in);
-OnePulse op2(clk_2_26,  flip_deb, flip_in);
+OnePulse op2(clk, flip_deb, flip_in); 
 assign rst_n = !reset_in;
 
 //counter module
 Parameterized_Ping_Pong_Counter_Slowed ppp_counter (
-    .clk(clk_2_26),//should count in an observable frequency (0.5s~1s per count)
+    .clk(clk),
+    .slow_clk(clk_2_26),//should count in an observable frequency (0.5s~1s per count)
     .rst_n(rst_n),
     .enable(enable),
     .flip(flip_in),
@@ -132,6 +134,9 @@ end
 
 //display 4-digits concurently
 always @(posedge clk_2_17) begin
+    if (!rst_n)
+        display_digit <= 2'b00;
+    else  
     case (display_digit) 
     2'b00: begin
         outLED <= cntLED2;
@@ -218,8 +223,10 @@ endmodule
 
 
 //parametrized ping ping counter, slowed
-module Parameterized_Ping_Pong_Counter_Slowed (clk, rst_n, enable, flip, max, min, direction, out);
-input clk, rst_n;
+module Parameterized_Ping_Pong_Counter_Slowed (clk, slow_clk, rst_n, enable, flip, max, min, direction, out);
+input clk;
+input slow_clk;
+input rst_n;
 input enable;
 input flip;
 input [4-1:0] max;
@@ -231,12 +238,12 @@ reg next_count; //1 up, 0 down
 
 
 //seq block
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(!rst_n) begin //rst_n
         out <= min;
         direction <= 1'b1;
     end
-    else if(enable && max>min && out<=max && out>=min) begin
+    else if(slow_clk&& enable && max>min && out<=max && out>=min) begin
     //counter is enabled and in range
         out <= (next_count)? out+1 : out-1;
         direction <= next_count;
@@ -247,7 +254,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-//comb block, maybe change to seq?
+//comb block
 always @(*) begin
     if(out == max)
         next_count = 1'b0;
