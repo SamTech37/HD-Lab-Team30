@@ -63,6 +63,8 @@ always @(posedge clk) begin
             2'b11: dout <= tdout3;
         endcase
     end
+    else
+        dout <= 8'b0000_0000; //test
 end
 
 endmodule
