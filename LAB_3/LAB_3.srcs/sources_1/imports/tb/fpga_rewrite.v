@@ -18,8 +18,8 @@ wire reset_in, flip_in; //debounced + onepulsed
 wire direction;
 wire [4-1:0] out;
 
-wire rst_n; //active-low reset for submodules
-assign rst_n = !reset_in;
+wire rst_n; assign rst_n = !reset_in; //active-low reset for submodules
+
 reg [7-1:0] dirLED;//7-seg display 1 & 0
 reg [7-1:0] cntLED1, cntLED2;//7-seg display 3 & 2
 
@@ -32,16 +32,98 @@ OnePulse op1(clk,  reset_deb, reset_in);
 OnePulse op2(clk,  flip_deb, flip_in);
 
 
-
+//counter module
+Parameterized_Ping_Pong_Counter_Slowed ppp_counter(
+    .clk(clk), .rst_n(rst_n), .enable(enable), .flip(flip_in),
+    .max(max), .min(min), .direction(direction), .out(out)
+);
 
 
 //7-seg display output 
-//testing display, change it back later
-wire [7-1:0]seg;
-seven_segment_display ssd1(clk, rst_n, seg);
+always @(posedge clk) begin case(out)  
+    4'b0000:begin
+        cntLED1 <= 7'b0000001; // "0"
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0001:begin
+        cntLED1 <= 7'b1001111; // "1" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0010:begin
+        cntLED1 <= 7'b0010010; // "2" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0011:begin
+        cntLED1 <= 7'b0000110; // "3" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0100:begin
+        cntLED1 <= 7'b1001100; // "4" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0101:begin
+        cntLED1  <= 7'b0100100; // "5"
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0110:begin
+        cntLED1 <= 7'b0100000; // "6" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b0111:begin
+        cntLED1 <= 7'b0001111; // "7" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b1000:begin
+        cntLED1 <= 7'b0000000; // "8" 
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b1001:begin
+        cntLED1 <= 7'b0000100; // "9"
+        cntLED2 <= 7'b0000001; // "0"
+    end
+    4'b1010:begin
+        cntLED1 <= 7'b0000001; // "0"
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    4'b1011:begin
+        cntLED1 <= 7'b1001111; // "1" 
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    4'b1100:begin
+        cntLED1 <= 7'b0010010; // "2" 
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    4'b1101:begin
+        cntLED1 <= 7'b0000110; // "3" 
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    4'b1110:begin
+        cntLED1 <= 7'b1001100; // "4" 
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    4'b1111:begin
+        cntLED1  <= 7'b0100100; // "5" 
+        cntLED2 <= 7'b1001111; // "1" 
+    end
+    default:begin
+        cntLED1 <= 7'b0000001; // "0"
+        cntLED2 <= 7'b0000001; // "0"
+    end
+
+    endcase
+
+    case(direction)
+    1'b0:  dirLED <= 7'b110_0011; //the bottom 3 segs
+    1'b1: dirLED <= 7'b001_1101; //the top 3 segs
+    default: dirLED <= 7'b001_1101; 
+    endcase
+end
+
+
+//concurrent display at 1.3KHz
 always @(*) begin
-    outLED = seg;
-    an = max;
+    outLED = cntLED1;
+    an = 4'b1100;
 end
 
 endmodule
@@ -49,62 +131,6 @@ endmodule
 
 
 /*submodule used*/
-
-//7-seg display
-module seven_segment_display (
-    clk,        
-    rst_n,      
-    seg 
-);
-
-input clk, rst_n;
-output reg [6:0] seg;
-
-parameter DIV = 27;  // Clock divider value for slower clock
-reg [DIV-1:0]cnt;  // Counter for dividing the clock frequency
-reg slow_clk;  // Slower clock signal
-always @(posedge clk) begin
-    if (!rst_n) begin
-        cnt <= 0;
-        slow_clk <= 1'b0;
-    end else begin
-        cnt <= cnt + 1;
-        slow_clk <= (cnt==0)? 1'b1 : 1'b0;  // Toggle slow clock
-    end
-end
-
-
-
-reg [3:0] digit;  // 4-bit register for the digit to display (0-9)
-
-always @(posedge slow_clk) begin
-    if (!rst_n) begin
-        digit <= 0;
-    end else begin
-        digit <= digit + 1;  
-    end
-end
-
-// Map the digit to the 7-segment display segments (reversed bit mapping [6:0] = CA~CG)
-always @(*) begin
-    case (digit)
-        4'd0: seg = 7'b0000001;  // Display 0 (reversed bits)
-        4'd1: seg = 7'b1001111;  // Display 1 (reversed bits)
-        4'd2: seg = 7'b0010010;  // Display 2 (reversed bits)
-        4'd3: seg = 7'b0000110;  // Display 3 (reversed bits)
-        4'd4: seg = 7'b1001100;  // Display 4 (reversed bits)
-        4'd5: seg = 7'b0100100;  // Display 5 (reversed bits)
-        4'd6: seg = 7'b0100000;  // Display 6 (reversed bits)
-        4'd7: seg = 7'b0001111;  // Display 7 (reversed bits)
-        4'd8: seg = 7'b0000000;  // Display 8 (reversed bits)
-        4'd9: seg = 7'b0000100;  // Display 9 (reversed bits)
-        default: seg = 7'b1111111; // Turn off display for invalid digits
-    endcase
-end
-
-endmodule
-
-
 
 //debounce
 module Debounce(clk, pb_in, pb_debounced);
@@ -134,7 +160,7 @@ endmodule
 
 
 
-//parametrized ping ping counter
+//parametrized ping ping counter, slowed to 1.3Hz to be observable
 module Parameterized_Ping_Pong_Counter_Slowed (clk, rst_n, enable, flip, max, min, direction, out);
     input clk, rst_n;
     input enable;
@@ -145,9 +171,21 @@ module Parameterized_Ping_Pong_Counter_Slowed (clk, rst_n, enable, flip, max, mi
     output reg [4-1:0] out;
 
     reg next_count; //1 up, 0 down
+    parameter DIV = 27;
+    reg [DIV-1:0] cnt; //generate a slower clock rate, ~ 1.3Hz
+    reg slow_clk;
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            cnt <= 0;
+            slow_clk <= 1'b0;
+        end else begin
+            cnt <= cnt + 1;
+            slow_clk <= (cnt==0)? 1'b1 : 1'b0;  // Toggle slow clock
+        end
+    end
 
     //seq block
-    always @(posedge clk) begin
+    always @(posedge slow_clk) begin
         if(!rst_n) begin //rst_n
             out <= min;
             direction <= 1'b1;
