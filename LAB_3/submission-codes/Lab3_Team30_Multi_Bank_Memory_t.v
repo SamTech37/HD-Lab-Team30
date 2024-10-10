@@ -41,8 +41,8 @@ initial begin
 	#(cyc)
     wen = 1'b0;
     ren = 1'b1;
-    raddr = 11'b00010000000;
-    #(cyc) raddr = 11'b01010000000;
+    raddr = 11'b010_1000_0000;
+    #(cyc) raddr = 11'b000_1000_0000;
 
 
 	
