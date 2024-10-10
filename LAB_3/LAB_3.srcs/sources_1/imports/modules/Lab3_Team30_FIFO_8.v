@@ -21,6 +21,7 @@ always @(posedge clk) begin
         read_pointer <= 0;
     end
     else begin
+    $display("write_pointer = %d, read_pointer = %d", write_pointer, read_pointer);
     //read operation(not empty)
         if(ren && write_pointer != read_pointer) begin
             dout <= FIFO[read_pointer];
@@ -29,13 +30,14 @@ always @(posedge clk) begin
             error <= 0;
         end
     //write operation(not full)
-        else if(wen && write_pointer != read_pointer-1 && ren == 1'b0) begin
+        else if(wen && write_pointer != (read_pointer-1'b1) && ren == 1'b0) begin
             FIFO[write_pointer] <= din;
             //$display("write_pointer = %d, wp = %d", write_pointer, FIFO[write_pointer-1]);
             write_pointer <= write_pointer + 1;
             error <= 0;
         end
-        else error <= 1;
+        else if((wen && write_pointer == (read_pointer-1'b1) && ren == 1'b0) || (ren && write_pointer == read_pointer)) error <= 1;
+        else error <= 0;
     end
 end
 endmodule
