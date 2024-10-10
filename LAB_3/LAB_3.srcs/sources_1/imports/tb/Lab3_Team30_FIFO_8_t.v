@@ -12,7 +12,8 @@ FIFO_8 FIFO(.clk(clk), .rst_n(rst_n), .wen(wen), .ren(ren), .din(din), .dout(dou
 // clock generation
 parameter cyc = 10;
 always#(cyc/2) clk = !clk;
-always#(cyc) din = (din + 1)%8; //add sin by 1 every cycle
+always#(cyc) din = (din + 1)%8; //add din by 1 every cycle
+
 //what should i test?
 //empty or full eroor will become one
 //read, write function work, and the error should be zero
