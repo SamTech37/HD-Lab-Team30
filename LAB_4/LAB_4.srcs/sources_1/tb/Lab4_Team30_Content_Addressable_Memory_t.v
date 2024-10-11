@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module Content_Addressable_Memory_T(clk, wen, ren, din, addr, dout, hit);
+module Content_Addressable_Memory_T();
 reg clk;
 reg wen, ren;
 reg [7:0] din;

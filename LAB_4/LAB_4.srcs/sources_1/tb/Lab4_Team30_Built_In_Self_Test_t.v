@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module Built_In_Self_Test_T(clk, rst_n, scan_en, scan_in, scan_out);
+module Built_In_Self_Test_T();
 //I/O
 reg clk;
 reg rst_n;

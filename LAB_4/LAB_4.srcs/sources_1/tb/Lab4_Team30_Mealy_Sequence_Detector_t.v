@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module Mealy_Sequence_Detector_T (clk, rst_n, in, dec);
+module Mealy_Sequence_Detector_T ();
 reg clk, rst_n;
 reg in;
 wire dec;

@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module Scan_Chain_Design_T(clk, rst_n, scan_in, scan_en, scan_out);
+module Scan_Chain_Design_T();
 reg clk;
 reg rst_n;
 reg scan_in;
