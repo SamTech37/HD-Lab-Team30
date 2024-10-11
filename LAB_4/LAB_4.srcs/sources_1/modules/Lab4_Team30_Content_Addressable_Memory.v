@@ -8,4 +8,6 @@ input [3:0] addr;
 output [3:0] dout;
 output hit;
 
+reg [8-1:0] mem [16-1:0]; // a memory block of 16 lines * 8-bit 
+
 endmodule
