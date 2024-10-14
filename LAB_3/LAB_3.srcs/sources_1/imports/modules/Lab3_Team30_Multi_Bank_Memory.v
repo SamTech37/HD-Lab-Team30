@@ -55,16 +55,14 @@ Bank_Memory BM3(
 );
 
 always @(posedge clk) begin
-    if (ren) begin
+    if (ren)
         case (sub_raddr)
             2'b00: dout <= tdout0;
             2'b01: dout <= tdout1;
             2'b10: dout <= tdout2;
             2'b11: dout <= tdout3;
         endcase
-    end
-    else
-        dout <= 8'b0000_0000; //test
+    else dout<=8'b0000_0000;
 end
 
 endmodule
@@ -154,7 +152,7 @@ reg [8-1:0] mem [128-1:0]; // 128 words of 8-bit data
 //seq block to R/W memory
 always @(posedge clk) begin
     if(ren) begin // read has higher priority than write 
-        fdout <= (mem[addr])? mem[addr] : 8'b0000_0000;
+        fdout <= mem[addr];
         //$display("raddr = %b, value = %d", addr, (mem[addr])? mem[addr] : 8'b0000_0000);
     end
     else if ((!ren) && wen) begin
@@ -165,6 +163,7 @@ always @(posedge clk) begin
         fdout <= 8'b0000_0000; //no r/w performed
     end
 end
+
 
 //always @(*) 
         //$display("waddr = %b, value = %d", addr, mem[addr]);
