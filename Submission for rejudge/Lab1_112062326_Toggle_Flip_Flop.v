@@ -13,7 +13,7 @@ wire t1,t2;
 
 MyXOR exor(q,t,t1);
 and a1(t2,t1,rst_n);
-D_Flip_Flop DFF(clk,t,q);
+D_Flip_Flop DFF(clk,t2,q);
 
 
 endmodule
