@@ -16,7 +16,7 @@ assign sub_waddr = waddr[10:9];
 
 Bank_Memory BM0(
     .clk(clk),
-    .ren(ren),
+    .ren(ren && (sub_raddr == 2'b00)),
     .wen(wen && (sub_waddr == 2'b00)),
     .waddr(waddr),
     .raddr(raddr),
@@ -24,9 +24,9 @@ Bank_Memory BM0(
     .tdout(tdout0)
 );
 
-Bank_Memory BM1(
+Bank_Memory BM1( 
     .clk(clk),
-    .ren(ren),
+    .ren(ren && (sub_raddr == 2'b01)),
     .wen(wen && (sub_waddr == 2'b01)),
     .waddr(waddr),
     .raddr(raddr),
@@ -36,7 +36,7 @@ Bank_Memory BM1(
 
 Bank_Memory BM2(
     .clk(clk),
-    .ren(ren),
+    .ren(ren && (sub_raddr == 2'b10)),
     .wen(wen && (sub_waddr == 2'b10)),
     .waddr(waddr),
     .raddr(raddr),
@@ -46,7 +46,7 @@ Bank_Memory BM2(
 
 Bank_Memory BM3(
     .clk(clk),
-    .ren(ren),
+    .ren(ren && (sub_raddr == 2'b11)),
     .wen(wen && (sub_waddr == 2'b11)),
     .waddr(waddr),
     .raddr(raddr),
@@ -54,16 +54,18 @@ Bank_Memory BM3(
     .tdout(tdout3)
 );
 
-always @(posedge clk) begin
-    if (ren)
-        case (sub_raddr)
-            2'b00: dout <= tdout0;
-            2'b01: dout <= tdout1;
-            2'b10: dout <= tdout2;
-            2'b11: dout <= tdout3;
-        endcase
-    else dout<=8'b0000_0000;
+always @(tdout0, tdout1, tdout2, tdout3) begin
+    if(ren)
+    case (sub_raddr)
+        2'b00: dout = tdout0;
+        2'b01: dout = tdout1;
+        2'b10: dout = tdout2;
+        2'b11: dout = tdout3;
+    endcase
+    else 
+        dout = 0;
 end
+
 
 endmodule
 
@@ -74,7 +76,7 @@ input ren, wen;
 input [11-1:0] waddr;
 input [11-1:0] raddr;
 input [8-1:0] din;
-output [8-1:0] tdout;
+output reg [8-1:0] tdout;
 
 wire [2-1:0] sub_sub_raddr;
 wire [2-1:0] sub_sub_waddr;
@@ -126,15 +128,17 @@ Sub_Bank_Memory SBM3(
     .fdout(fdout3)
 );
 
-assign tdout = (sub_sub_raddr[1])? (sub_sub_raddr[0]? fdout3 : fdout2) : (sub_sub_raddr[0]? fdout1 : fdout0);
-
-/*   case (sub_sub_raddr)
+always @(fdout0, fdout1, fdout2, fdout3) begin
+    if(ren)
+    case (sub_sub_raddr)
         2'b00: tdout = fdout0;
         2'b01: tdout = fdout1;
         2'b10: tdout = fdout2;
         2'b11: tdout = fdout3;
-        default: tdout = 8'b00000000;
-    endcase*/
+    endcase
+    else 
+        tdout = 0;
+end
 
 endmodule
 
