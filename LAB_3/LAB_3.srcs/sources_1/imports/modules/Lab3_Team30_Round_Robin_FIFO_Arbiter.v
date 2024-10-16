@@ -4,9 +4,10 @@ module Round_Robin_FIFO_Arbiter(clk, rst_n, wen, a, b, c, d, dout, valid);
 input clk;
 input rst_n;
 input [4-1:0] wen;
+reg [4-1:0] ren;
 input [8-1:0] a, b, c, d;
-output [8-1:0] dout;
-output valid;
+output reg [8-1:0] dout;
+output reg valid;
 wire [8-1:0] tdout [4-1:0];
 wire error[4-1:0];
 
@@ -14,31 +15,42 @@ reg [1:0] count;
 wire [1:0] next_count;
 
 //com
-assign next_count = count+1;
+assign next_count = count+1'b1;
 always @ (*) begin
     case(count)
-        00: ren = 4'b0001;
-        01: ren = 4'b0010;
-        10: ren = 4'b0100;
-        11: ren = 4'b1000;
+        2'b00: ren = 4'b0001;
+        2'b01: ren = 4'b0010;
+        2'b10: ren = 4'b0100;
+        2'b11: ren = 4'b1000;
     endcase
 end
-FIFO_8 f0(clk, rst_n, wen[0], ren[0], din, tdout[0], error[0]);
-FIFO_8 f2(clk, rst_n, wen[1], ren[1], din, tdout[1], error[1]);
-FIFO_8 f3(clk, rst_n, wen[2], ren[2], din, tdout[2], error[2]);
-FIFO_8 f1(clk, rst_n, wen[3], ren[3], din, tdout[3], error[3]);
+
+FIFO_8 f0(clk, rst_n, wen[0], ren[0], a, tdout[0], error[0]);
+FIFO_8 f1(clk, rst_n, wen[1], ren[1], b, tdout[1], error[1]);
+FIFO_8 f2(clk, rst_n, wen[2], ren[2], c, tdout[2], error[2]);
+FIFO_8 f3(clk, rst_n, wen[3], ren[3], d, tdout[3], error[3]);
+
+
 //seq
 
 always @ (posedge clk) begin
     //counter
-    count <= next_count;
     if(!rst_n) begin
         dout <= 8'b0;
         valid <= 1'b0;
         count <= 2'b0;
     end
     else begin
-
+        count <= next_count;
+        $display("count: %d", count);
+        if(wen[count] || error[count]) begin
+            valid <= 1'b0;
+            dout <= 8'b0;
+        end
+        else begin
+            valid <= 1'b1;
+            dout <= tdout[count];
+        end
     end
 
 end
