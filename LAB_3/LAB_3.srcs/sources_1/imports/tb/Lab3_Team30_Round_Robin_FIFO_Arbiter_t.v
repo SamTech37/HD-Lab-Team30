@@ -93,5 +93,6 @@ initial begin
     b = 8'bx;
     c = 8'bx;
     d = 8'bx;
+     #(cyc) $finish;
 end
 endmodule

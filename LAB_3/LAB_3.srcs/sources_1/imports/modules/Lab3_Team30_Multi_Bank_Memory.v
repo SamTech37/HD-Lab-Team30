@@ -78,6 +78,7 @@ input [11-1:0] raddr;
 input [8-1:0] din;
 output reg [8-1:0] tdout;
 
+reg [6:0] addr [3:0];
 wire [2-1:0] sub_sub_raddr;
 wire [2-1:0] sub_sub_waddr;
 wire [8-1:0] fdout0, fdout1, fdout2, fdout3;
@@ -90,7 +91,7 @@ Sub_Bank_Memory SBM0(
     .ren(ren && (sub_sub_raddr == 2'b00)),
     .wen(wen && (sub_sub_waddr == 2'b00)),
     //if the sub bank need to read, set read_address to address, or set write_address to address
-    .addr((sub_sub_raddr == 2'b00) ? raddr[6:0] : waddr[6:0]),
+    .addr(addr[0]),
     .din(din),
     .fdout(fdout0)
 );
@@ -101,7 +102,7 @@ Sub_Bank_Memory SBM1(
     .ren(ren && (sub_sub_raddr == 2'b01)),
     .wen(wen && (sub_sub_waddr == 2'b01)),
     //if the sub bank need to read, set read_address to address, or set write_address to address
-    .addr((sub_sub_raddr == 2'b01) ? raddr[6:0] : waddr[6:0]),
+    .addr(addr[1]),
     .din(din),
     .fdout(fdout1)
 );
@@ -112,7 +113,7 @@ Sub_Bank_Memory SBM2(
     .ren(ren && (sub_sub_raddr == 2'b10)),
     .wen(wen && (sub_sub_waddr == 2'b10)),
     //if the sub bank need to read, set read_address to address, or set write_address to address
-    .addr((sub_sub_raddr == 2'b10) ? raddr[6:0] : waddr[6:0]),
+    .addr(addr[2]),
     .din(din),
     .fdout(fdout2)
 );
@@ -123,10 +124,31 @@ Sub_Bank_Memory SBM3(
     .ren(ren && (sub_sub_raddr == 2'b11)),
     .wen(wen && (sub_sub_waddr == 2'b11)),
     //if the sub bank need to read, set read_address to address, or set write_address to address
-    .addr((sub_sub_raddr == 2'b11) ? raddr[6:0] : waddr[6:0]),
+    .addr(addr[3]),
     .din(din),
     .fdout(fdout3)
 );
+
+always @(*) begin
+    if(ren && wen) begin
+        addr[sub_sub_raddr] = raddr[6:0];
+        if(sub_sub_raddr != sub_sub_waddr) begin
+            addr[sub_sub_waddr] = waddr[6:0];
+        end
+        else begin
+            addr[sub_sub_waddr] = addr[sub_sub_waddr];
+        end
+    end
+    else  if(ren && !wen) begin
+       addr[sub_sub_raddr] = raddr[6:0]; 
+    end
+    else if(!ren && wen) begin
+        addr[sub_sub_waddr] = waddr[6:0];
+    end
+    else begin
+        addr[0] = 0;
+    end
+end
 
 always @(fdout0, fdout1, fdout2, fdout3) begin
     if(ren)
