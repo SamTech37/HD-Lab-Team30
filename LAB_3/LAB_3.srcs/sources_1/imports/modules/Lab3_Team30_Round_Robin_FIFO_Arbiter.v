@@ -22,6 +22,7 @@ always @ (*) begin
         2'b01: ren = 4'b0010;
         2'b10: ren = 4'b0100;
         2'b11: ren = 4'b1000;
+        default: ren = 4'b0001;
     endcase
 end
 
