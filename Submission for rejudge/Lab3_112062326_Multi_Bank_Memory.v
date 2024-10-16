@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 
 
+//FAILED
 //NEED REWORK
 //top layer
 module Multi_Bank_Memory (clk, ren, wen, waddr, raddr, din, dout);
