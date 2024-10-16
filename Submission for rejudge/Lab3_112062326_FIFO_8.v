@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 
 
+//NEED REWORK
 module FIFO_8(clk, rst_n, wen, ren, din, dout, error);
 input clk;
 input rst_n;

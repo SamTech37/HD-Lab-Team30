@@ -1,15 +1,14 @@
 `timescale 1ns/1ps
 
-// lab1 gate-level-only
-// don't use primitive XOR directly
-// name all your gates
+
+//fixed typo
 module Toggle_Flip_Flop(clk, q, t, rst_n);
 input clk;
 input t;
 input rst_n;
 output q;
 
-wire t1,t2;
+wire t1,t2; //come up with better names
 
 MyXOR exor(q,t,t1);
 and a1(t2,t1,rst_n);

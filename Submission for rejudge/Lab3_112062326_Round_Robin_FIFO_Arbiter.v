@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-//need revision
+//NEED REWORK
 module Round_Robin_FIFO_Arbiter(clk, rst_n, wen, a, b, c, d, dout, valid);
 input clk;
 input rst_n;

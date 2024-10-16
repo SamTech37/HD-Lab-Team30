@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 
+//passed
 // gate level
 module Dmux_1x2_4bit(in, out1, out2, sel);
 input [3:0] in;
