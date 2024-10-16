@@ -13,6 +13,7 @@ reg next_count; //1 up, 0 down
 
 //seq block
 always @(posedge clk) begin
+    //bad coding style, avoid this in the future
     if(!rst_n) begin //reset
         out <= min;
         direction <= 1'b1;
@@ -30,6 +31,7 @@ end
 
 //comb block
 always @(*) begin
+    //bad coding style
     if(out == max)
         next_count = 1'b0;
     else if(out == min)
