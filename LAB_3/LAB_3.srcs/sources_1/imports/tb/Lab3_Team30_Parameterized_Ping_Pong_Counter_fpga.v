@@ -1,7 +1,9 @@
 `timescale 1ns / 1ps
 
 
-// revised version
+// flawed & buggy
+// either the reset works and flip doesn't 
+// or vice versa
 module Parameterized_Ping_Pong_Counter_fpga (clk, reset, enable, flip, max, min, outLED, an);
 // I/O signals
 input clk; // clock rate 100 MHz = 1e8 Hz, namely, 10 ns per cycle

@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
 
+//by Samuel
+//PASSED TA's TESTBENCH
 module FIFO_8(clk, rst_n, wen, ren, din, dout, error);
 input clk;
 input rst_n;
@@ -49,5 +51,62 @@ always @(posedge clk) begin
 end
     assign write_next = write_pointer+1;
     assign read_next = read_pointer+1;
+
+endmodule
+
+//alternative implementation
+//by Sam
+//PASSED our own TESTBENCH
+
+module FIFO_8_alt(clk, rst_n, wen, ren, din, dout, error);
+input clk;
+input rst_n;
+input wen, ren;
+input [8-1:0] din;
+output reg [8-1:0] dout;
+output reg error;
+
+wire full,empty;
+reg [3-1:0] rp; //read-pointer
+reg [4-1:0] wp;//write-pointer, leave some breathing room
+reg [8-1:0] FIFO[8-1:0]; //8 cells of 8-bit data
+
+parameter dont_care = 8'hdc;
+
+
+assign empty = (rp == wp);
+assign full = (wp > 4'b0111);
+
+//seq block
+always @(posedge clk) begin
+if(!rst_n) begin
+    rp <= 0;
+    wp <= 0;
+    dout <= 0;
+    error <= 0;
+end else begin
+    if(ren) begin
+        dout <= (empty)? dont_care : FIFO[rp];
+        rp <= (empty)? rp : rp+1;
+        error <= empty;
+        wp <= wp;
+    end 
+    
+    else begin //not reading
+        dout <= dont_care;
+        rp <= rp;
+        if(wen) begin
+            wp <= (full)? wp : wp+1;
+            FIFO[wp] <= (full)? dont_care : din;
+            error <= full;
+        end 
+        
+        else begin //not writing
+            error <= 1'b0;
+            wp <= wp;
+        end
+    end
+end  
+end
 
 endmodule

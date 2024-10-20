@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-// maybe consider spliting input, main feature & output into serveral clock cycles
+// first make it work then refactor
 module Parameterized_Ping_Pong_Counter_fpga_revision (clk, reset, enable, flip, max, min, outLED, an);
 // I/O signals
 input clk; // clock rate 100 MHz = 1e8 Hz, namely, 10 ns per cycle
@@ -10,37 +10,15 @@ input enable;
 input flip;
 input [4-1:0] max;
 input [4-1:0] min;
-output reg [4-1:0] an;
-output reg [7-1:0] outLED;//7-seg 
-
-wire reset_deb, flip_deb; //debounced
-wire reset_in, flip_in; //debounced + onepulsed
-wire direction;
-wire [4-1:0] out;
-
-wire rst_n; assign rst_n = !reset_in; //active-low reset for submodules
-
-reg [7-1:0] dirLED;//7-seg display 1 & 0
-reg [7-1:0] cntLED1, cntLED2;//7-seg display 3 & 2
+output reg [4-1:0] an;//7-seg anode
+output reg [7-1:0] outLED;//7-seg digit
 
 
-
-//debounce & one-pulse for button input
-Debounce deb1(clk, reset, reset_deb);
-Debounce deb2(clk, flip, flip_deb);
-OnePulse op1(clk,  reset_deb, reset_in);
-OnePulse op2(clk,  flip_deb, flip_in);
-
-
-//counter module
-Parameterized_Ping_Pong_Counter_Slowed ppp_counter(
-    .clk(clk), .rst_n(rst_n), .enable(enable), .flip(flip_in),
-    .max(max), .min(min), .direction(direction), .out(out)
-);
-
+wire clk_2_17, clk_2_26;
+wire count, direction;
 
 //7-seg display output 
-always @(posedge clk) begin case(out)  
+always @(posedge clk) begin case(count)  
     4'b0000:begin
         cntLED1 <= 7'b0000001; // "0"
         cntLED2 <= 7'b0000001; // "0"
@@ -120,10 +98,9 @@ always @(posedge clk) begin case(out)
 end
 
 
-//concurrent display at 1.3KHz
-always @(*) begin
-    outLED = cntLED1;
-    an = 4'b1100;
+//concurrent display at ~1KHz
+always @(posedge clk) begin
+    
 end
 
 endmodule
@@ -132,86 +109,83 @@ endmodule
 
 /*submodule used*/
 
+//clk divider
+module ClkDivider(clk, rst_n, clk_2_17, clK_2_26);
+
+endmodule
+
 //debounce
 module Debounce(clk, pb_in, pb_debounced);
-    input clk, pb_in;
-    output pb_debounced;
+input clk, pb_in;
+output pb_debounced;
 
-    reg [4-1:0] DFF;
+reg [4-1:0] DFF; //maybe use more bits for better debounce
 
-    always @(posedge clk) begin
-    DFF <= {DFF[2:0], pb_in};
-    end
-    assign pb_debounced = (DFF == 4'b1111)? 1'b1 : 1'b0;
+always @(posedge clk) begin
+DFF <= {DFF[2:0], pb_in};
+end
+assign pb_debounced = (DFF == 4'b1111)? 1'b1 : 1'b0;
 endmodule
 
 
 //one-pulse
 module OnePulse(clk,  pb_debounced, pb_onepulse);
-    input clk, pb_debounced;
-    output reg pb_onepulse;
-    reg pb_debounced_delay;
+input clk, pb_debounced;
+output reg pb_onepulse;
+reg pb_debounced_delay;
 
-    always @(posedge clk) begin
-    pb_debounced_delay <= pb_debounced;
-    pb_onepulse <= (pb_debounced && !pb_debounced_delay)? 1'b1 : 1'b0;
-    end
+always @(posedge clk) begin
+pb_debounced_delay <= pb_debounced;
+pb_onepulse <= (pb_debounced && !pb_debounced_delay)? 1'b1 : 1'b0;
+end
 endmodule
 
 
 
-//parametrized ping ping counter, slowed to 1.3Hz to be observable
-module Parameterized_Ping_Pong_Counter_Slowed (clk, rst_n, enable, flip, max, min, direction, out);
-    input clk, rst_n;
-    input enable;
-    input flip;
-    input [4-1:0] max;
-    input [4-1:0] min;
-    output reg direction;
-    output reg [4-1:0] out;
+//slowed to observable rate, 1~2Hz
+module Parameterized_Ping_Pong_Counter_Slowed (clk, slow_clk, rst_n, enable, flip, max, min, direction, out);
+input clk
+input slow_clk;
+input rst_n;
+input enable;
+input flip;
+input [4-1:0] max;
+input [4-1:0] min;
+output reg direction;
+output reg [4-1:0] out;
 
-    reg next_count; //1 up, 0 down
-    parameter DIV = 27;
-    reg [DIV-1:0] cnt; //generate a slower clock rate, ~ 1.3Hz
-    reg slow_clk;
-    always @(posedge clk) begin
-        if (!rst_n) begin
-            cnt <= 0;
-            slow_clk <= 1'b0;
-        end else begin
-            cnt <= cnt + 1;
-            slow_clk <= (cnt==0)? 1'b1 : 1'b0;  // Toggle slow clock
-        end
-    end
+reg next_count; //1 up, 0 down
 
-    //seq block
-    always @(posedge slow_clk) begin
-        if(!rst_n) begin //rst_n
-            out <= min;
-            direction <= 1'b1;
-        end
-        else if(enable && max>min && out<=max && out>=min) begin
-        //counter is enabled and in range
-            out <= (next_count)? out+1 : out-1;
-            direction <= next_count;
-        end
-        else begin // hold value when disabled or out-of-range 
-            out <= out; 
-            direction <= direction;
-        end
+//seq block
+always @(posedge clk) begin
+    if(!rst_n) begin //reset
+        out <= min;
+        direction <= 1'b1;
     end
+    //add slow clock here
+    else if(enable && max>min && out<=max && out>=min) begin
+    //counter is enabled and in range
+        out <= (next_count)? out+1 : out-1;
+        direction <= next_count;
+    end
+    else begin // hold value when disabled or out-of-range 
+        out <= out; 
+        direction <= direction;
+    end
+end
 
-    //comb block
-    always @(*) begin
-        if(out == max)
-            next_count = 1'b0;
-        else if(out == min)
-            next_count = 1'b1;
-        else if (flip)
-            next_count = !direction;
-        else
-            next_count = direction;
-            
-    end
+//comb block
+always @(*) begin
+    if(out == max)
+        next_count = 1'b0;
+    else if(out == min)
+        next_count = 1'b1;
+    else if (flip)
+        next_count = !direction;
+    else
+        next_count = direction;
+        
+end
+
+
 endmodule
-
