@@ -164,6 +164,7 @@ always @(posedge clk_2_17) begin
 
 end
 
+
 endmodule
 
 /*submodule used*/
@@ -214,6 +215,7 @@ always @(posedge clk) begin
     else begin
         cnt_17 <= cnt_17+1;
         clk_2_17 <= (cnt_17 == 17'h1_ffff)? 1'b1 : 1'b0;
+        //clk_2_17 <= (cnt_17[16] == 1'b1)? 1'b1 : 1'b0;
         cnt_26 <= cnt_26+1;
         clk_2_26 <= (cnt_26 == 26'h6f_ffff)? 1'b1 : 1'b0;
     end

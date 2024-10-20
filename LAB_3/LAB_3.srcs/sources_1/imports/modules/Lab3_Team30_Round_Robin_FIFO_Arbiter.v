@@ -43,10 +43,10 @@ always @ (posedge clk) begin
     end
     else begin
         count <= next_count;
-        $display("count: %d", count);
+        //$display("count: %d", count);
         //$display("ren1: %d: %x, ren2: %d, ren3: %d, ren4: %d", ren[0], ren[1], ren[2], ren[3]);
-        $display("wen1: %d, wen2: %d, wen3: %d, wen4: %d", wen[0], wen[1], wen[2], wen[3]);
-        $display("a: %d, b: %d, c: %d, d: %d", tdout[0], tdout[1], tdout[2], tdout[3]);
+        //$display("wen1: %d, wen2: %d, wen3: %d, wen4: %d", wen[0], wen[1], wen[2], wen[3]);
+        //$display("a: %d, b: %d, c: %d, d: %d", tdout[0], tdout[1], tdout[2], tdout[3]);
         if(wen[count] || error[count]) begin
 
             valid <= 1'b0;
@@ -54,9 +54,9 @@ always @ (posedge clk) begin
         end
         else begin
             valid <= 1'b1;
-            $display("count: %d, tdout[count]: %h", count, fdout);
+            //$display("count: %d, tdout[count]: %h", count, fdout);
             dout <= tdout[count];
-            $display("read!\n");
+            //$display("read!\n");
         end
     end
 

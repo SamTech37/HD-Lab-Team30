@@ -9,7 +9,7 @@ input [4-1:0] min;
 output reg direction;
 output reg [4-1:0] out;
 
-reg next_count; //1 up, 0 down
+reg next_direction; //1 up, 0 down
 
 //seq block
 always @(posedge clk) begin
@@ -19,8 +19,8 @@ always @(posedge clk) begin
     end
     else if(enable && max>min && out<=max && out>=min) begin
     //counter is enabled and in range
-        out <= (next_count)? out+1 : out-1;
-        direction <= next_count;
+        out <= (next_direction)? out+1 : out-1;
+        direction <= next_direction;
     end
     else begin // hold value when disabled or out-of-range 
         out <= out; 
@@ -31,13 +31,13 @@ end
 //comb block
 always @(*) begin
     if(out == max)
-        next_count = 1'b0;
+        next_direction = 1'b0;
     else if(out == min)
-        next_count = 1'b1;
+        next_direvtion = 1'b1;
     else if (flip)
-        next_count = !direction;
+        next_direction = !direction;
     else
-        next_count = direction;
+        next_direction = direction;
         
 end
 

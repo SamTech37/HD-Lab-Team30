@@ -14,6 +14,9 @@ and AND2_1(out2[0], in[0], sel);
 and AND2_2(out2[1], in[1], sel);
 and AND2_3(out2[2], in[2], sel);
 and AND2_4(out2[3], in[3], sel);
+
+
+
 endmodule
 
 
