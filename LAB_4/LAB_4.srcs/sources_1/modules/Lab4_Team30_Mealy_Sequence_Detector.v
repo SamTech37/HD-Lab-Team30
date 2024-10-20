@@ -35,17 +35,17 @@ end
 always @(*) 
 case (state) //it's a Mealy machine
     S1: next_state = in ? S3:S1 ;
-    S2: next_state = in ? S4:S5 ;
+    S2: next_state = in ? S5:S4 ;
     S3: next_state = in ? S6:S4 ;
     S4: next_state = in ? S3:S6 ;
-    S5: next_state = in ? S7:S3;
+    S5: next_state = in ? S7:S4;
     S6: next_state = S6;
     S7: next_state = S7 ;
     default: next_state = in ? S2: S1 ;//S0
 endcase
 
 //output 1 only when the patterns are detected
-assign dec = (state == S6 && in|| state == S7 && !in) ? 1'b1 : 1'b0;
+assign dec = ((state == S6) && in) || ((state == S7) && !in );
 
 
 endmodule
