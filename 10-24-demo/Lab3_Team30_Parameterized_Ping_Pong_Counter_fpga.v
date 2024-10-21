@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-/* TODO
+/* Code for demo
  * reset works
  * counting up & down works
  * flip sometimes jitters
