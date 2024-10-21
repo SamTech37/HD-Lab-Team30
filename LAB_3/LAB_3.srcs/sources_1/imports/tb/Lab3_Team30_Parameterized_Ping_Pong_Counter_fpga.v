@@ -1,9 +1,12 @@
 `timescale 1ns / 1ps
 
-
-// flawed & buggy
-// either the reset works and flip doesn't 
-// or vice versa
+/* TODO
+ * reset works
+ * counting up & down works
+ * flip is jittering
+ */
+//use only the system clock for every always block
+//the slowed clock should be treated as enable signals
 module Parameterized_Ping_Pong_Counter_fpga (clk, reset, enable, flip, max, min, outLED, an);
 // I/O signals
 input clk; // clock rate 100 MHz = 1e8 Hz, namely, 10 ns per cycle
@@ -26,20 +29,18 @@ reg [7-1:0] cntLED1, cntLED2;//7-seg display 3 & 2
 
 wire rst_n; //active-low reset for submodules
 wire clk_2_17,clk_2_26; // 100MHz slowed down to 1.3KHz & 2.6Hz
-
-
+assign rst_n = !reset_in;
 
 
 //clock divider
 Clock_Divider cd(clk, rst_n, clk_2_17,clk_2_26);
 
 //debounce & one-pulse for button input
-Debounce deb1(!clk, reset, reset_deb); //maybe invert the clocks to stablize?
-OnePulse op1(!clk,  reset_deb, reset_in);
+Debounce db1(clk, reset, reset_deb);
+OnePulse op1(!clk, reset_deb, reset_in); //the signal better be up before a posedge, just like in a testbench
+Debounce db2(clk, flip, flip_deb);
+OnePulse op2(!clk, flip_deb, flip_in); 
 
-Debounce deb2(clk, flip, flip_deb);
-OnePulse op2(clk, flip_deb, flip_in); 
-assign rst_n = !reset_in;
 
 //counter module
 Parameterized_Ping_Pong_Counter_Slowed ppp_counter (
@@ -57,10 +58,10 @@ Parameterized_Ping_Pong_Counter_Slowed ppp_counter (
 //7-seg display output logic
 always @(direction or out) begin
     case(out)  
-    4'b0000:begin
-        cntLED1 <= 7'b0000001; // "0"
-        cntLED2 <= 7'b0000001; // "0"
-    end
+     4'b0000:begin
+         cntLED1 <= 7'b0000001; // "0"
+         cntLED2 <= 7'b0000001; // "0"
+     end
     4'b0001:begin
         cntLED1 <= 7'b1001111; // "1" 
         cntLED2 <= 7'b0000001; // "0"
@@ -130,40 +131,51 @@ always @(direction or out) begin
     case(direction)
     1'b0:  dirLED <= 7'b110_0011; //the bottom 3 segs
     1'b1: dirLED <= 7'b001_1101; //the top 3 segs
-    default: dirLED <= 7'b001_1101; 
+    default: dirLED <= 7'b110_0011; //the bottom 3 segs
     endcase
 end
 
 //display 4-digits concurently
-always @(posedge clk_2_17) begin
-    if (!rst_n)
+//an[3:0] & outLED[6:0]
+always @(posedge clk) begin
+    if (!rst_n) begin
         display_digit <= 2'b00;
-    else  
-    case (display_digit) 
-    2'b00: begin
-        outLED <= cntLED2;
-        an <= 4'b0111;
-        display_digit <= 2'b01;
-    end
-    2'b01: begin
-        outLED <= cntLED1;
-        an <= 4'b1011;
-        display_digit <= 2'b10;
-    end
-
-    2'b10, 2'b11: begin
-        outLED <= dirLED;
-        an <= 4'b1100;
-        display_digit <= 2'b00;
-    end
-
-    default: begin
-        outLED <= dirLED;
         an <= 4'b1111;
-        display_digit <= 2'b00; //reset display cycle
+        outLED <= 7'b111_1111;
     end
-    endcase
+    else begin
+        if(!clk_2_17) begin
+            display_digit <= display_digit;
+            outLED <= outLED;
+            an <= an;
+        end
+        else begin
+        case (display_digit) 
+            2'b00: begin
+                outLED <= cntLED2;
+                an <= 4'b0111;
+                display_digit <= 2'b01;
+            end
+            2'b01: begin
+                outLED <= cntLED1;
+                an <= 4'b1011;
+                display_digit <= 2'b10;
+            end
 
+            2'b10, 2'b11: begin
+                outLED <= dirLED;
+                an <= 4'b1100;
+                display_digit <= 2'b00;
+            end
+
+            default: begin
+                outLED <= dirLED;
+                an <= 4'b1111;
+                display_digit <= 2'b00; //reset display cycle
+            end
+        endcase
+        end
+    end
 end
 
 
@@ -176,16 +188,18 @@ module Debounce(clk, pb_in, pb_debounced);
 input clk, pb_in;
 output pb_debounced;
 
-reg [4-1:0] DFF;
+reg [16-1:0] DFF; //the signal has to be stable for 16 cycles = 160ns
 
 always @(posedge clk) begin
-    DFF <= {DFF[2:0], pb_in};
+    DFF <= {DFF[14:0], pb_in};
 end
-assign pb_debounced = (DFF == 4'b1111)? 1'b1 : 1'b0;
+assign pb_debounced = (DFF == 16'hFFFF)? 1'b1 : 1'b0;
 endmodule
 
 
-//one-pulse, the signal will be up for exactly one clock cycle
+//one-pulse, 
+//the signal will be up for exactly one clock cycle, 
+//after button pushed
 module OnePulse(clk,  pb_debounced, pb_onepulse);
 
 input clk, pb_debounced;
@@ -199,7 +213,9 @@ end
 endmodule
 
 
-//clock divider for time-multiplexing 7-seg display & slowing down counter
+//clock divider for 
+//time-multiplexing 7-seg display & 
+//slowing down the counter
 module Clock_Divider(clk, rst_n, clk_2_17,clk_2_26);
 input clk,rst_n;
 output reg clk_2_17, clk_2_26;
@@ -217,9 +233,8 @@ always @(posedge clk) begin
     else begin
         cnt_17 <= cnt_17+1;
         clk_2_17 <= (cnt_17 == 17'h1_ffff)? 1'b1 : 1'b0;
-        //clk_2_17 <= (cnt_17[16] == 1'b1)? 1'b1 : 1'b0;
         cnt_26 <= cnt_26+1;
-        clk_2_26 <= (cnt_26 == 26'h6f_ffff)? 1'b1 : 1'b0;
+        clk_2_26 <= (cnt_26 == 26'h3ff_ffff)? 1'b1 : 1'b0;
     end
 end
 
@@ -247,14 +262,15 @@ always @(posedge clk) begin
         out <= min;
         direction <= 1'b1;
     end
-    else if(slow_clk&& enable && max>min && out<=max && out>=min) begin
-    //counter is enabled and in range
-        out <= (next_count)? out+1 : out-1;
+    else begin
         direction <= next_count;
-    end
-    else begin // hold value when disabled or out-of-range 
-        out <= out; 
-        direction <= direction;
+        if(slow_clk && enable && max>min && out<=max && out>=min) begin
+            //counter is enabled and in range
+            out <= (next_count)? out+1 : out-1;
+        end
+        else begin // hold the count when disabled, out-of-range, or when the slow_clk is not up
+            out <= out; 
+        end
     end
 end
 
@@ -268,7 +284,6 @@ always @(*) begin
         next_count = !direction;
     else
         next_count = direction;
-        
 end
 endmodule
 
