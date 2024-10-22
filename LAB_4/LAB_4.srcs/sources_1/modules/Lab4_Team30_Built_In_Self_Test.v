@@ -10,6 +10,16 @@ wire temp;
 assign scan_in = temp;
 Many_To_One_LFSRR MTO_LFSR(clk, rst_n, temp);
 Scan_Chain_Design SCD(clk, rst_n, temp, scan_en, scan_out);
+/*reg [2:0] count;
+wire next_count;
+assign next_count = count + 1'b1;
+always @(posedge clk) begin
+    if(!rst_n) count <= 1'b0;
+    else begin
+    count <= next_count;
+    //$display("input[%d] = %d", count, temp);
+    end
+end*/
 endmodule
 
 module Many_To_One_LFSRR(clk, rst_n, fout);
