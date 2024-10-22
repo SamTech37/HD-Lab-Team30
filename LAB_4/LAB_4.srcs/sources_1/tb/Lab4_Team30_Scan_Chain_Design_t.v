@@ -35,13 +35,26 @@ initial begin
     scan_in = 1'b1;
     #(cyc) scan_in = 1'b0;
     #(cyc) scan_in = 1'b1;
-    #(cyc) scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
     //a0, a1, a2, a3
     #(cyc) scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
     #(cyc) scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
+    #(cyc) scan_en = 1'b0;
+    scan_in = 1'b0;
+    #(cyc) scan_en = 1'b1;
+    @(negedge clk)
+    scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
     #(cyc) scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
+    //a0, a1, a2, a3
     #(cyc) scan_in = 1'b1;
-    #(cyc*3/2) scan_en = 1'b0;
+    #(cyc) scan_in = 1'b0;
+    #(cyc) scan_in = 1'b1;
+    #(cyc) scan_in = 1'b0;
+    #(cyc) scan_en = 1'b0;
     scan_in = 1'b0;
     #(cyc) scan_en = 1'b1;
     #(cyc*12);

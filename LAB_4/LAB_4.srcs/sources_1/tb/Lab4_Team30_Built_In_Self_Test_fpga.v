@@ -228,13 +228,13 @@ output scan_out;
 output [3:0] a, b;
 wire temp;
 assign scan_in = temp;
-Many_To_One_LFSRR MTO_LFSR(clk, rst_n, initial_state, clk_d, temp);
-Scan_Chain_Design SCD(clk, clk_d, rst_n, temp, scan_en, scan_out, a, b);
+Many_To_One_LFSR_fpga MTO_LFSR(clk, rst_n, initial_state, clk_d, temp);
+Scan_Chain_Design_fpga SCD(clk, clk_d, rst_n, temp, scan_en, scan_out, a, b);
 endmodule
 
 
 //Change LFSR to FPGA
-module Many_To_One_LFSRR(clk, rst_n, initial_state, clk_d, fout);
+module Many_To_One_LFSR_fpga(clk, rst_n, initial_state, clk_d, fout);
 input clk;
 input rst_n;
 input [8-1:0] initial_state;
@@ -258,24 +258,24 @@ end
 endmodule
 
 
-module Scan_Chain_Design(clk, clk_d, rst_n, scan_in, scan_en, scan_out, a, b);
+module Scan_Chain_Design_fpga(clk, clk_d, rst_n, scan_in, scan_en, scan_out, a, b);
 input clk, clk_d, scan_in, rst_n, scan_en;
 output scan_out;
 output [3:0] a, b;
 wire [7:0] p;
 assign p = a*b;
-SDFF SDFF7(clk, clk_d, rst_n, scan_in, scan_en, p[7], a[3]);
-SDFF SDFF6(clk, clk_d, rst_n, a[3], scan_en, p[6], a[2]);
-SDFF SDFF5(clk, clk_d, rst_n, a[2], scan_en, p[5], a[1]);
-SDFF SDFF4(clk, clk_d, rst_n, a[1], scan_en, p[4], a[0]);
-SDFF SDFF3(clk, clk_d, rst_n, a[0], scan_en, p[3], b[3]);
-SDFF SDFF2(clk, clk_d, rst_n, b[3], scan_en, p[2], b[2]);
-SDFF SDFF1(clk, clk_d, rst_n, b[2], scan_en, p[1], b[1]);
-SDFF SDFF0(clk, clk_d, rst_n, b[1], scan_en, p[0], b[0]);
+SDFF_fpga SDFF7(clk, clk_d, rst_n, scan_in, scan_en, p[7], a[3]);
+SDFF_fpga SDFF6(clk, clk_d, rst_n, a[3], scan_en, p[6], a[2]);
+SDFF_fpga SDFF5(clk, clk_d, rst_n, a[2], scan_en, p[5], a[1]);
+SDFF_fpga SDFF4(clk, clk_d, rst_n, a[1], scan_en, p[4], a[0]);
+SDFF_fpga SDFF3(clk, clk_d, rst_n, a[0], scan_en, p[3], b[3]);
+SDFF_fpga SDFF2(clk, clk_d, rst_n, b[3], scan_en, p[2], b[2]);
+SDFF_fpga SDFF1(clk, clk_d, rst_n, b[2], scan_en, p[1], b[1]);
+SDFF_fpga SDFF0(clk, clk_d, rst_n, b[1], scan_en, p[0], b[0]);
 and(scan_out, 1, b[0]);
 endmodule
 
-module SDFF(clk, clk_d, rst_n, scan_in, scan_en, data ,din);
+module SDFF_fpga(clk, clk_d, rst_n, scan_in, scan_en, data ,din);
 input clk, rst_n, scan_en, data, scan_in, clk_d;
 output reg din;
 reg dinnext;
