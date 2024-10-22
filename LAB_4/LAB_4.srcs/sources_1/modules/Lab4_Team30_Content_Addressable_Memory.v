@@ -60,7 +60,7 @@ assign next_read = (eq[3])? 2'b11: (eq[2])? 2'b10 : (eq[1])? 2'b01 : (eq[0])? 2'
 //seq
 always @(posedge clk) begin 
 if(ren) begin //read has higher priority
-    dout <= (next_hit)? next_read : dont_care;
+    dout <= next_read;
     hit <= next_hit;
 end
 else begin
