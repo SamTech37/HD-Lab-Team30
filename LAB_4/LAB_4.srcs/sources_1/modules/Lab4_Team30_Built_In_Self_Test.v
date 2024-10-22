@@ -6,18 +6,22 @@ input rst_n;
 input scan_en;
 output scan_in;
 output scan_out;
-Many_To_One_LFSR MTO_LSR(clk, rst_n, scan_in);
-Scan_Chain_Design SCD(clk, rst_n, scan_in, scan_en, scan_out);
+wire temp;
+assign scan_in = temp;
+Many_To_One_LFSRR MTO_LFSR(clk, rst_n, temp);
+Scan_Chain_Design SCD(clk, rst_n, temp, scan_en, scan_out);
 endmodule
 
-module Many_To_One_LFSR(clk, rst_n, fout);
+module Many_To_One_LFSRR(clk, rst_n, fout);
 input clk;
 input rst_n;
 output fout;
 reg [8-1:0] out;
 assign fout = out[7];
+
 //seq
 always @(posedge clk) begin
+//$display("fout: %d", fout);
     if(!rst_n)
         out <= 8'b1011_1101; //reset value
     else begin
