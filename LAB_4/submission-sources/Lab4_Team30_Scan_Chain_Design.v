@@ -1,36 +1,5 @@
 `timescale 1ns/1ps
 
-module Built_In_Self_Test(clk, rst_n, scan_en, scan_in, scan_out);
-input clk;
-input rst_n;
-input scan_en;
-output scan_in;
-output scan_out;
-wire temp;
-assign scan_in = temp;
-Many_To_One_LFSRRR MTO_LFSR(clk, rst_n, temp);
-Scan_Chain_Design SCD(clk, rst_n, temp, scan_en, scan_out);
-endmodule
-
-module Many_To_One_LFSRRR(clk, rst_n, fout);
-input clk;
-input rst_n;
-output fout;
-reg [8-1:0] out;
-assign fout = out[7];
-
-//seq
-always @(posedge clk) begin
-    if(!rst_n)
-        out <= 8'b1011_1101; //reset value
-    else begin
-        out[0] <= (out[1]^out[2])^(out[3]^out[7]);
-        out[7:1] <= out[6:0];
-    end
-end
-endmodule
-
-
 module Scan_Chain_Design(clk, rst_n, scan_in, scan_en, scan_out);
 input clk, scan_in, rst_n, scan_en;
 output scan_out;
@@ -62,3 +31,8 @@ always @ (posedge clk) begin
     else din <= dinnext;
 end
 endmodule
+
+
+
+
+
