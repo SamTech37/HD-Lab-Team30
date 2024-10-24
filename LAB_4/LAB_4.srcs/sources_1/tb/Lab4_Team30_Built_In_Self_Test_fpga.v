@@ -31,8 +31,8 @@ Clock_Divider cd(clk, rst_n, clk_2_17,clk_2_26);
 //debounce & one-pulse for button input
 Debounce db1(clk, reset, reset_deb);
 OnePulse op1(!clk, reset_deb, reset_in); //the signal better be up before a posedge, just like in a testbench
-Debounce db2(clk, dclk, dclk_deb);
-OnePulse op2(!clk, dclk_deb, dclk_in); 
+Debounce db2(clk, d_clk, d_clk_deb);
+OnePulse op2(!clk, d_clk_deb, d_clk_in); 
 
 
 //BIST module

@@ -3,7 +3,7 @@
 <!--                                                         -->
 <!-- Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.   -->
 
-<Project Version="7" Minor="61" Path="D:/HD-Lab-Team30/LAB_3/LAB_3.xpr">
+<Project Version="7" Minor="61" Path="C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_3/LAB_3.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="8d2750f4b0974cc7a1886b6140432b04"/>
