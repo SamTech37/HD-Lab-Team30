@@ -1,5 +1,6 @@
 `timescale 1ns/1ps 
 
+//this is a bonus question
 module Booth_Multiplier_4bit(clk, rst_n, start, a, b, p);
 input clk;
 input rst_n; 
