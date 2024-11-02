@@ -18,7 +18,7 @@ Traffic_Light_Controller TL_controller (
 
 
 parameter cyc = 10;
-always @(cyc/2) clk = ~clk;
+always #(cyc/2) clk = ~clk;
     
 
 initial begin

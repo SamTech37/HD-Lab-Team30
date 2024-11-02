@@ -20,7 +20,7 @@ Booth_Multiplier_4bit BM_4bit (
 
 
 parameter cyc = 10;
-always @(cyc/2) clk = ~clk;
+always #(cyc/2) clk = ~clk;
     
 
 initial begin
