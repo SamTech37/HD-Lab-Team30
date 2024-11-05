@@ -1,13 +1,14 @@
 `timescale 1ns/1ps
 
-module Music_fpga (PS2_DATA, PS2_CLK, clk, pmod_1, pmod_2, pmod_4);
+module Music_fpga (PS2_DATA, PS2_CLK, clk, pmod_1, pmod_2, pmod_4, display, digit);
 inout wire PS2_DATA;
 inout wire PS2_CLK;
 input wire clk;
 output pmod_1;	//AIN
 output pmod_2;	//GAIN
 output pmod_4;	//SHUTDOWN_N
-
+output wire [6:0] display;
+output wire [3:0] digit;
 parameter BEAT_FREQ = 32'd1;	//one beat=1sec //****
 parameter DUTY_BEST = 10'd512;	//duty cycle=50%
 
@@ -17,12 +18,17 @@ reg fast;
 reg next_fast;
 
 wire [31:0] freq;
-wire [3:0] ibeatNum;
+wire [4:0] ibeatNum;
 wire beatFreq;
 wire rst;
+wire rst_oneplus;
+wire rst_oneplus_n;
 
+assign rst_oneplus_n = !rst_oneplus;
 assign pmod_2 = 1'd1;	//no gain(6dB)
 assign pmod_4 = 1'd1;	//turn-on
+
+
 
 parameter [8:0] ENTER_CODES = 9'b0_0101_1010; // Enter => 5A
 parameter [8:0] KEY_CODES_w = 9'b0_0001_1101; // w => 1D
@@ -39,13 +45,14 @@ KeyboardDecoder key_de (
     .key_valid(been_ready),
     .PS2_DATA(PS2_DATA),
     .PS2_CLK(PS2_CLK),
-    .rst(rst),
+    .rst(rst_oneplus),
     .clk(clk)
 );
 
+OnePulse OP1(rst_oneplus, rst, clk);
 assign rst = (been_ready && key_down[ENTER_CODES]);
-always @ (posedge clk, posedge rst) begin
-    if(rst) begin
+always @ (posedge clk, posedge rst_oneplus) begin
+    if(rst_oneplus) begin
         direction <= 1'b1;
         fast <= 1'b0;
     end
@@ -54,37 +61,44 @@ always @ (posedge clk, posedge rst) begin
             case(last_change)
                 // ENTER_CODES : next_direction = 1'b1;
                 ENTER_CODES: begin
+                    //rst <= 1'b1;
                     direction <= direction;
                     fast <= fast;
                 end
                 KEY_CODES_w: begin
+                    //rst <= rst;
                     direction <= 1'b1;
                     fast <= fast;
                 end
                 KEY_CODES_s: begin
+                    //rst <= rst;
                     direction <= 1'b0;
                     fast <= fast;
                 end
                 KEY_CODES_r: begin
+                    //rst <= rst;
                     direction <= direction;
                     fast <= !fast;
                 end
                 default: begin
+                    //rst <= rst;
                     direction <= direction;
                     fast <= fast;
                 end
             endcase
         end
         else begin
+            //rst <= rst;
             direction <= direction;
             fast <= fast;
         end
     end
+    //if(key_down[ENTER_CODES] == 1'b0) rst <= 1'b0;
 end
 
 //Generate beat speed
 PWM_gen btSpeedGen ( .clk(clk), 
-					 .rst(rst),
+					 .rst(rst_oneplus),
                      .fast(fast),
 					 .freq(BEAT_FREQ),
 					 .duty(DUTY_BEST), 
@@ -93,11 +107,14 @@ PWM_gen btSpeedGen ( .clk(clk),
 	
 //manipulate beat
 PlayerCtrl playerCtrl_00 ( .clk(beatFreq),
-						   .rst(rst),
+						   .rst(rst_oneplus),
                            .direction(direction),
 						   .ibeat(ibeatNum)
 );	
+
+SevenSegment ss(.display(display), .digit(digit), .ibeatNum(ibeatNum), .rst(rst), .clk(clk));
 	
+
 //Generate variant freq. of tones
 Music music00 ( .ibeatNum(ibeatNum),
 				.tone(freq)
@@ -105,7 +122,7 @@ Music music00 ( .ibeatNum(ibeatNum),
 
 // Generate particular freq. signal
 PWM_gen toneGen ( .clk(clk), 
-				  .rst(rst), 
+				  .rst(rst_oneplus), 
 				  .freq(freq),
                   .fast(1'b0),
 				  .duty(DUTY_BEST), 
@@ -151,16 +168,23 @@ endmodule
 
 //PlayerCtrl
 module PlayerCtrl (
-	input clk,
-	input rst,
+    input clk,
+    input rst,
     input direction,
-	output reg [3:0] ibeat
+    output reg [4:0] ibeat
 );
-parameter BEATLEANGTH = 14;
+parameter BEATLEANGTH = 28;
+
+reg reset_done;
 
 always @(posedge clk, posedge rst) begin
-	if (rst) ibeat <= 0;
-    else begin
+    if (rst) begin
+        ibeat <= 0;
+        reset_done <= 0;
+    end else if (!reset_done) begin
+        reset_done <= 1;
+        ibeat <= ibeat; // Hold the value for one beatFreq cycle
+    end else begin
         if (direction && ibeat < BEATLEANGTH) ibeat <= ibeat + 1;
         else if (!direction && ibeat > 0) ibeat <= ibeat - 1;
         else ibeat <= ibeat;
@@ -169,45 +193,74 @@ end
 
 endmodule
 
+
 //Music
 module Music (
-	input [3:0] ibeatNum,	
+	input [4:0] ibeatNum,	
 	output reg [31:0] tone
 );
 
-parameter NM0 = 32'd262; //Do-m
-parameter NM1 = 32'd294; //Re-m
-parameter NM2 = 32'd330; //Mi-m
-parameter NM3 = 32'd349; //Fa-m
-parameter NM4 = 32'd392; //Sol-m
-parameter NM5 = 32'd440; //La-m
-parameter NM6 = 32'd494; //Si-m
-parameter NM7 = 32'd262 << 1; //Do-h
-parameter NM8 = 32'd294 << 1; //Re-h
-parameter NM9 = 32'd330 << 1; //Mi-h
-parameter NM10 = 32'd349 << 1; //Fa-h
-parameter NM11 = 32'd392 << 1; //Sol-h
-parameter NM12 = 32'd440 << 1; //La-h
-parameter NM13 = 32'd494 << 1; //Si-h
-parameter NM14 = 32'd262 << 2; //Do-hh
+parameter NM0 = 32'd262; //Do-4
+parameter NM1 = 32'd294; //Re-4
+parameter NM2 = 32'd330; //Mi-4
+parameter NM3 = 32'd349; //Fa-4
+parameter NM4 = 32'd392; //Sol-4
+parameter NM5 = 32'd440; //La-4
+parameter NM6 = 32'd494; //Si-4
+parameter NM7 = 32'd262 << 1; //Do-5
+parameter NM8 = 32'd294 << 1; //Re-5
+parameter NM9 = 32'd330 << 1; //Mi-5
+parameter NM10 = 32'd349 << 1; //Fa-5
+parameter NM11 = 32'd392 << 1; //Sol-5
+parameter NM12 = 32'd440 << 1; //La-5
+parameter NM13 = 32'd494 << 1; //Si-5
+parameter NM14 = 32'd262 << 2; //Do-6
+parameter NM15 = 32'd294 << 2; //Re-6
+parameter NM16 = 32'd330 << 2; //Mi-6
+parameter NM17 = 32'd349 << 2; //Fa-6
+parameter NM18 = 32'd392 << 2; //Sol-6
+parameter NM19 = 32'd440 << 2; //La-6
+parameter NM20 = 32'd494 << 2; //Si-6
+parameter NM21 = 32'd262 << 3; //Do-7
+parameter NM22 = 32'd294 << 3; //Re-7
+parameter NM23 = 32'd330 << 3; //Mi-7
+parameter NM24 = 32'd349 << 3; //Fa-7
+parameter NM25 = 32'd392 << 3; //Sol-7
+parameter NM26 = 32'd440 << 3; //La-7
+parameter NM27 = 32'd494 << 3; //Si-7
+parameter NM28 = 32'd262 << 4; //Do-8
 
 always @(*) begin
 	case (ibeatNum)
-		4'd0 : tone = NM0;
-		4'd1 : tone = NM1;
-		4'd2 : tone = NM2;
-		4'd3 : tone = NM3;
-        4'd4 : tone = NM4;
-        4'd5 : tone = NM5;
-        4'd6 : tone = NM6;
-        4'd7 : tone = NM7;
-		4'd8 : tone = NM8;
-		4'd9 : tone = NM9;
-        4'd10 : tone = NM10;
-        4'd11 : tone = NM11;
-        4'd12 : tone = NM12;
-        4'd13 : tone = NM13;
-        4'd14 : tone = NM14;
+		5'd0 : tone = NM0;
+		5'd1 : tone = NM1;
+		5'd2 : tone = NM2;
+		5'd3 : tone = NM3;
+        5'd4 : tone = NM4;
+        5'd5 : tone = NM5;
+        5'd6 : tone = NM6;
+        5'd7 : tone = NM7;
+		5'd8 : tone = NM8;
+		5'd9 : tone = NM9;
+        5'd10 : tone = NM10;
+        5'd11 : tone = NM11;
+        5'd12 : tone = NM12;
+        5'd13 : tone = NM13;
+        5'd14 : tone = NM14;
+        5'd15 : tone = NM15;
+		5'd16 : tone = NM16;
+		5'd17 : tone = NM17;
+		5'd18 : tone = NM18;
+        5'd19 : tone = NM19;
+        5'd20 : tone = NM20;
+        5'd21 : tone = NM21;
+        5'd22 : tone = NM22;
+		5'd23 : tone = NM23;
+		5'd24 : tone = NM24;
+        5'd25 : tone = NM25;
+        5'd26 : tone = NM26;
+        5'd27 : tone = NM27;
+        5'd28 : tone = NM28;
 		default : tone = NM0;
 	endcase
 end
@@ -370,3 +423,35 @@ module OnePulse (
     end
 endmodule
 //Do we need other code like Keboardctrl?? or just use IP
+
+module SevenSegment(
+    output reg [6:0] display,
+    output reg [3:0] digit,
+    input wire [4:0] ibeatNum,
+    input wire rst,
+    input wire clk
+    );
+    
+    reg [4:0] display_num;
+    always @ (posedge clk) begin
+        digit <= 4'b1110;
+        display_num <= ibeatNum;
+    end
+    
+    always @ (*) begin
+        case (display_num)
+            0 : display = 7'b1000000;	//0000
+            1 : display = 7'b1111001;   //0001                                                
+            2 : display = 7'b0100100;   //0010                                                
+            3 : display = 7'b0110000;   //0011                                             
+            4 : display = 7'b0011001;   //0100                                               
+            5 : display = 7'b0010010;   //0101                                               
+            6 : display = 7'b0000010;   //0110
+            7 : display = 7'b1111000;   //0111
+            8 : display = 7'b0000000;   //1000
+            9 : display = 7'b0010000;	//1001
+            default : display = 7'b1111111;
+        endcase
+    end
+    
+endmodule
