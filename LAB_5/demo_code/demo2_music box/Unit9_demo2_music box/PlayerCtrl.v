@@ -1,7 +1,7 @@
 
 module PlayerCtrl (
 	input clk,
-	input rst_n,
+	input reset,
 	output reg [7:0] ibeat
 );
 parameter BEATLEAGTH = 63;

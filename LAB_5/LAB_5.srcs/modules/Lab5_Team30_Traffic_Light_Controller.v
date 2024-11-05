@@ -42,7 +42,7 @@ always @(*) begin
     A: begin
         hw_light = 3'b100; //Green
         lr_light = 3'b001; //Red
-        if(count >= 2 && lr_has_car == 1'b1) begin
+        if(count >= 69 && lr_has_car == 1'b1) begin // need to test by display
             count_reset = 1'b1;
             next_state = B;
         end
@@ -51,7 +51,7 @@ always @(*) begin
     B: begin
         hw_light = 3'b010; //Yellow
         lr_light = 3'b001; //Red
-        if(count >= 1) begin
+        if(count >= 24) begin
             count_reset = 1'b1;
             next_state = C;
         end
@@ -60,8 +60,8 @@ always @(*) begin
     C: begin
         hw_light = 3'b001; //Red
         lr_light = 3'b001; //Red
-    //not sure if the lr_has_car need to be 1???
-        if(count >= 0 && lr_has_car ) begin
+    //not sure if the lr_has_car need to be 1??? //count >= need to count 1??
+        if(count >= 0 && lr_has_car) begin
             count_reset = 1'b1;
             next_state = D;
         end
@@ -74,7 +74,7 @@ always @(*) begin
     D: begin
         hw_light = 3'b001; //Red
         lr_light = 3'b100; //Green
-        if(count >= 2) begin
+        if(count >= 69) begin
             count_reset = 1'b1;
             next_state = E;
         end
@@ -83,7 +83,7 @@ always @(*) begin
     E: begin
         hw_light = 3'b001; //Red
         lr_light = 3'b010; //Yellow
-        if(count >= 1) begin
+        if(count >= 24) begin
             count_reset = 1'b1;
             next_state = F;
         end

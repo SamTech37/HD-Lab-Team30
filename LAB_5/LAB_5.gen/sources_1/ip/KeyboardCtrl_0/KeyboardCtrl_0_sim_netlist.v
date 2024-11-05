@@ -1,10 +1,10 @@
 // Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2022.2 (win64) Build 3671981 Fri Oct 14 05:00:03 MDT 2022
-// Date        : Tue Oct 29 16:11:09 2024
-// Host        : sam_acer2 running 64-bit major release  (build 9200)
+// Date        : Tue Nov  5 00:14:38 2024
+// Host        : Samuel running 64-bit major release  (build 9200)
 // Command     : write_verilog -force -mode funcsim
-//               d:/HD-Lab-Team30/LAB_5/LAB_5.gen/sources_1/ip/KeyboardCtrl_0/KeyboardCtrl_0_sim_netlist.v
+//               c:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_5/LAB_5.gen/sources_1/ip/KeyboardCtrl_0/KeyboardCtrl_0_sim_netlist.v
 // Design      : KeyboardCtrl_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.

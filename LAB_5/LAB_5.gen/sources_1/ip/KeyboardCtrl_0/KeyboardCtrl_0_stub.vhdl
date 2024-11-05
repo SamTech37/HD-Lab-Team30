@@ -1,10 +1,10 @@
 -- Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2022.2 (win64) Build 3671981 Fri Oct 14 05:00:03 MDT 2022
--- Date        : Tue Oct 29 16:11:09 2024
--- Host        : sam_acer2 running 64-bit major release  (build 9200)
+-- Date        : Tue Nov  5 00:14:38 2024
+-- Host        : Samuel running 64-bit major release  (build 9200)
 -- Command     : write_vhdl -force -mode synth_stub
---               d:/HD-Lab-Team30/LAB_5/LAB_5.gen/sources_1/ip/KeyboardCtrl_0/KeyboardCtrl_0_stub.vhdl
+--               c:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_5/LAB_5.gen/sources_1/ip/KeyboardCtrl_0/KeyboardCtrl_0_stub.vhdl
 -- Design      : KeyboardCtrl_0
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a35tcpg236-1
