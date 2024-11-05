@@ -24,6 +24,32 @@ always #(cyc/2) clk = ~clk;
     
 
 initial begin
+    @(negedge clk)
+    rst_n = 1'b0;
+    a = 16'd3;
+    b = 16'd5;
+    start = 1'b1;
+    @(negedge clk)
+    rst_n = 1'b1;
+    a = 16'd10;
+    b = 16'd30;
+    
+    
+    #(10*cyc)
+    a = 16'd6;
+    b = 16'd7;
+    start = 1'b1;
+    
+    #(10*cyc)
+    a = 16'd169;
+    b= 16'd39;
+    
+    #(20*cyc)
+    a = 16'd0;
+    b = 16'd6;
+    
+    #(3*cyc)
+    start = 1'b0;
 
 
     #(cyc) $finish;
