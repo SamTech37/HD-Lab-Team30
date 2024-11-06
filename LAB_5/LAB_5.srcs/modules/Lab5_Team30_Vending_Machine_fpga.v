@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 
 // [TODO]
-// fix debounce issue
 // add keyboard IO
 // add mechanism for change return
 
@@ -25,11 +24,11 @@ wire insert_five,insert_ten,insert_fifty;
 wire reset, clear;
 wire rst_n;
 //debounce & onepulse for btns
-Debounce db1(clk,btnL,btnL_db);
-Debounce db2(clk,btnC,btnC_db);
-Debounce db3(clk,btnR,btnR_db);
-Debounce db4(clk,btnD,btnD_db);
-Debounce db5(clk,btnU,btnU_db);
+Debounce db1(.clk(clk),.reset(rst),.pb(btnL),.pb_debounced(btnL_db));
+Debounce db2(.clk(clk),.reset(rst),.pb(btnC),.pb_debounced(btnC_db));
+Debounce db3(.clk(clk),.reset(rst),.pb(btnR),.pb_debounced(btnR_db));
+Debounce db4(.clk(clk),.reset(rst),.pb(btnD),.pb_debounced(btnD_db));
+Debounce db5(.clk(clk),.reset(rst),.pb(btnU),.pb_debounced(btnU_db));
 
 OnePulse op1(.clock(clk),.signal(btnL_db),.signal_single_pulse(insert_five));
 OnePulse op2(.clock(clk),.signal(btnC_db),.signal_single_pulse(insert_ten));
@@ -111,16 +110,32 @@ module OnePulse (
 endmodule
 
 //debounce
+//the signal must be stable for 4 cycles of 100Hz clock
+// 400 Hz = 2.5 ms
 module Debounce(
     input clk,
+    input reset,
     input pb,
     output pb_debounced
 );
-    
-    reg [64-1:0] DFF;
-    assign pb_debounced = (DFF == {16{4'hF}});
+    reg [20-1:0]clk_divider; //a 100Mhz/2^20 ~= 100Hz clock
+    reg [4-1:0] DFF;
+    assign pb_debounced = (DFF == 4'hF);
+
     always @(posedge clk) begin
-        DFF <= {DFF[62:0],pb};
+        if (reset) begin
+            clk_divider <= 1'b0;
+        end else begin
+            clk_divider <= clk_divider + 1'b1;
+        end
+    end
+
+    always @(posedge clk) begin
+        if(clk_divider == 20'hF_FFFF) begin
+            DFF <= {DFF[3:0], pb};
+        end else begin
+            DFF <= DFF;
+        end
     end
 
 endmodule
