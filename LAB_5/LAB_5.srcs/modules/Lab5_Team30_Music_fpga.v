@@ -175,17 +175,35 @@ parameter BEATLEANGTH = 28;
 
 reg reset_done;
 
+// always @(posedge clk, posedge rst) begin
+//     if (rst) begin
+//         ibeat <= 0;
+//         reset_done <= 0;
+//     end else if (!reset_done) begin
+//         reset_done <= 1;
+//         ibeat <= ibeat; // Hold the value for one beatFreq cycle
+//     end else begin
+//         if (direction && ibeat < BEATLEANGTH) ibeat <= ibeat + 1;
+//         else if (!direction && ibeat > 0) ibeat <= ibeat - 1;
+//         else ibeat <= ibeat;
+//     end
+// end
+
 always @(posedge clk, posedge rst) begin
     if (rst) begin
         ibeat <= 0;
         reset_done <= 0;
-    end else if (!reset_done) begin
-        reset_done <= 1;
-        ibeat <= ibeat; // Hold the value for one beatFreq cycle
-    end else begin
-        if (direction && ibeat < BEATLEANGTH) ibeat <= ibeat + 1;
-        else if (!direction && ibeat > 0) ibeat <= ibeat - 1;
-        else ibeat <= ibeat;
+    end
+    else begin
+        if (!reset_done) begin
+            reset_done <= 1;
+            ibeat <= ibeat; // Hold the value for one beatFreq cycle
+        end
+        else begin
+            if (direction && ibeat < BEATLEANGTH) ibeat <= ibeat + 1;
+            else if (!direction && ibeat > 0) ibeat <= ibeat - 1;
+            else ibeat <= ibeat;
+        end
     end
 end
 
