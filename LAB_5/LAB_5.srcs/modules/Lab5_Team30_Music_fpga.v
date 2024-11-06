@@ -13,9 +13,7 @@ parameter BEAT_FREQ = 32'd1;	//one beat=1sec //****
 parameter DUTY_BEST = 10'd512;	//duty cycle=50%
 
 reg direction;
-reg next_direction;
 reg fast;
-reg next_fast;
 
 wire [31:0] freq;
 wire [4:0] ibeatNum;
