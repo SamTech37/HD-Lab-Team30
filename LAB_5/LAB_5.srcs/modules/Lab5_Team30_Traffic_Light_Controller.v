@@ -23,12 +23,10 @@ always @(posedge clk) begin
     if(!rst_n) begin
         state <= A;
         count <= 1'b0;
-        count_reset <= 1'b0;
     end
     else begin
         state <= next_state;
         if(count_reset) begin
-            count_reset <= 1'b0;
             count <= 0;
         end
         else count <= count + 1'b1;
@@ -46,7 +44,10 @@ always @(*) begin
             count_reset = 1'b1;
             next_state = B;
         end
-        else next_state = state;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
+        end
     end
     B: begin
         hw_light = 3'b010; //Yellow
@@ -55,21 +56,23 @@ always @(*) begin
             count_reset = 1'b1;
             next_state = C;
         end
-        else next_state = state;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
+        end
     end
     C: begin
         hw_light = 3'b001; //Red
         lr_light = 3'b001; //Red
     //not sure if the lr_has_car need to be 1??? //count >= need to count 1??
-        if(count >= 0 && lr_has_car) begin
+        if(count >= 0) begin
             count_reset = 1'b1;
             next_state = D;
         end
-        else if(count >= 0 && !lr_has_car) begin
-            count_reset = 1'b1;
-            next_state = A;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
         end
-        else next_state = state;
     end
     D: begin
         hw_light = 3'b001; //Red
@@ -78,7 +81,10 @@ always @(*) begin
             count_reset = 1'b1;
             next_state = E;
         end
-        else next_state = state;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
+        end
     end
     E: begin
         hw_light = 3'b001; //Red
@@ -87,7 +93,10 @@ always @(*) begin
             count_reset = 1'b1;
             next_state = F;
         end
-        else next_state = state;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
+        end
     end
     F: begin
         hw_light = 3'b001; //Red
@@ -96,7 +105,10 @@ always @(*) begin
             count_reset = 1'b1;
             next_state = A;
         end
-        else next_state = state;
+        else begin
+            next_state = state;
+            count_reset = 1'b0;
+        end
     end
     default: begin
         // F

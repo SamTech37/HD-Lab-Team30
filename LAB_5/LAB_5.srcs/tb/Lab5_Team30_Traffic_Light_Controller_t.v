@@ -24,8 +24,8 @@ always #(cyc/2) clk = ~clk;
 initial begin
     @(negedge clk) rst_n = 1'b0;
     @(negedge clk) rst_n = 1'b1;
-    #(cyc*69) lr_has_car = 1'b1;
-    #(cyc*15)
+    #(cyc*250) lr_has_car = 1'b1;
+    #(cyc*250)
     #(cyc) $finish;
 end
 
