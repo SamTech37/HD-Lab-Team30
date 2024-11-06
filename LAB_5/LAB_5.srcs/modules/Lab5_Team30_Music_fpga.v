@@ -405,7 +405,7 @@ module KeyboardDecoder(
 
 endmodule
 
-//Oneplus
+//Onepulse
 module OnePulse (
     output reg signal_single_pulse,
     input wire signal,
