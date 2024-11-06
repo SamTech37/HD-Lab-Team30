@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 // [TODO]
-// add keyboard IO
+//fix BUY state in FSM
 
 
 module Vending_Machine_FPGA (
@@ -18,8 +18,9 @@ output wire [3:0] digit,
 output wire [3:0] outLED //LD3~LD0
 );
 
-wire [3:0] drink_select;
-wire key_A, key_S, key_D, key_F;
+
+
+
 
 wire btnL_db,btnC_db,btnR_db,btnD_db,btnU_db;
 wire insert_five,insert_ten,insert_fifty;
@@ -38,6 +39,30 @@ OnePulse op4(.clock(clk),.signal(btnD_db),.signal_single_pulse(clear));
 OnePulse op5(.clock(clk),.signal(btnU_db),.signal_single_pulse(rst));
 
 
+wire [3:0] drink_select;
+wire key_A, key_S, key_D, key_F;
+KeyInputDetector key_input(
+    .PS2_DATA(PS2_DATA),
+    .PS2_CLK(PS2_CLK),
+    .rst(rst),
+    .clk(clk),
+    .key_A(key_A),//COFFEE
+    .key_S(key_S),//COKE
+    .key_D(key_D),//OOLONG
+    .key_F(key_F)//WATER
+);
+
+ OnePulse op6(.clock(clk),.signal(key_A),.signal_single_pulse(drink_select[3]));
+ OnePulse op7(.clock(clk),.signal(key_S),.signal_single_pulse(drink_select[2]));
+ OnePulse op8(.clock(clk),.signal(key_D),.signal_single_pulse(drink_select[1]));
+ OnePulse op9(.clock(clk),.signal(key_F),.signal_single_pulse(drink_select[0]));
+//assign drink_select[3] = key_A;
+//assign drink_select[2] = key_S;
+//assign drink_select[1] = key_D;
+//assign drink_select[0] = key_F;
+
+
+
 wire [8:0] cash;
 Vending_Machine_FSM vendor(
     .clk(clk),
@@ -46,7 +71,7 @@ Vending_Machine_FSM vendor(
     .insert_five(insert_five),
     .insert_ten(insert_ten),
     .insert_fifty(insert_fifty),
-    .drink_select(4'b0000), //change to key signals later
+    .drink_select(drink_select), //change to key signals later
     .drink_avail(outLED),
     .cash(cash));
 
@@ -109,15 +134,20 @@ if(rst) begin
     cash <= MIN;
     state <= IDLE;
 end
-else begin 
+else begin
     state <= next_state;
     cash <= (next_cash > MAX) ? MAX : next_cash;
 
    case(state)
        BUY: begin
+           if(drink_select[3]&&drink_avail[3]) cash <= cash - COFFEE;
+           else if(drink_select[2]&&drink_avail[2]) cash <= cash - COKE;
+           else if(drink_select[1]&&drink_avail[1]) cash <= cash - OOLONG;
+           else if(drink_select[0]&&drink_avail[0]) cash <= cash - WATER;
+           else cash <= cash; //this case shouldn't happen
        end
        CHANGE: begin
-           if(clock_divider == {26{1'b1}}) begin
+           if(clock_divider == {26{1'b1}} && cash>=CHANGE_UNIT) begin
                cash <= cash - CHANGE_UNIT;
            end else cash <= cash;
        end
@@ -133,7 +163,7 @@ always @(*) begin
     next_cash = cash + insert_five*5 + insert_ten*10 + insert_fifty*50;
    case(state)
        IDLE: begin
-           if(clear && cash >= CHANGE_UNIT) next_state = CHANGE;
+           if(clear) next_state = CHANGE;
            else begin
                if ( select ) next_state = BUY;
                else next_state = IDLE;
@@ -285,3 +315,176 @@ module SevenSegmentDisplay(
 endmodule
 
 //keyboard I/O
+//detect ASDF keys
+module KeyInputDetector(
+    inout wire PS2_DATA,
+    inout wire PS2_CLK,
+    input wire rst,
+    input wire clk,
+    output wire key_A,
+    output wire key_S,
+    output wire key_D,
+    output wire key_F
+    );
+
+parameter [8:0] KEYCODE_A = 9'h0_1C;
+parameter [8:0] KEYCODE_S = 9'h0_1B;
+parameter [8:0] KEYCODE_D = 9'h0_23;
+parameter [8:0] KEYCODE_F = 9'h0_2B;
+
+wire [511:0] key_down;
+wire [8:0] last_change;
+wire been_ready;
+
+KeyboardDecoder key_de (
+    .key_down(key_down),//state of the keys
+    .last_change(last_change),
+    .key_valid(been_ready),
+    .PS2_DATA(PS2_DATA),
+    .PS2_CLK(PS2_CLK),
+    .rst(rst),
+    .clk(clk)
+);
+
+assign key_A = been_ready && key_down[KEYCODE_A];
+assign key_S = been_ready && key_down[KEYCODE_S];
+assign key_D = been_ready && key_down[KEYCODE_D];
+assign key_F = been_ready && key_down[KEYCODE_F];
+
+endmodule
+//Keyboard Decoder
+module KeyboardDecoder(
+    output reg [511:0] key_down,
+    output wire [8:0] last_change,
+    output reg key_valid,
+    inout wire PS2_DATA,
+    inout wire PS2_CLK,
+    input wire rst,
+    input wire clk
+    );
+    
+    parameter [1:0] INIT			= 2'b00;
+    parameter [1:0] WAIT_FOR_SIGNAL = 2'b01;
+    parameter [1:0] GET_SIGNAL_DOWN = 2'b10;
+    parameter [1:0] WAIT_RELEASE    = 2'b11;
+    
+    parameter [7:0] IS_INIT			= 8'hAA;
+    parameter [7:0] IS_EXTEND		= 8'hE0;
+    parameter [7:0] IS_BREAK		= 8'hF0;
+    
+    reg [9:0] key, next_key;		// key = {been_extend, been_break, key_in}
+    reg [1:0] state, next_state;
+    reg been_ready, been_extend, been_break;
+    reg next_been_ready, next_been_extend, next_been_break;
+    
+    wire [7:0] key_in;
+    wire is_extend;
+    wire is_break;
+    wire valid;
+    wire err;
+    
+    wire [511:0] key_decode = 1 << last_change;
+    assign last_change = {key[9], key[7:0]};
+    
+    KeyboardCtrl_0 inst (
+        .key_in(key_in),
+        .is_extend(is_extend),
+        .is_break(is_break),
+        .valid(valid),
+        .err(err),
+        .PS2_DATA(PS2_DATA),
+        .PS2_CLK(PS2_CLK),
+        .rst(rst),
+        .clk(clk)
+    );
+    
+    OnePulse op (
+        .signal_single_pulse(pulse_been_ready),
+        .signal(been_ready),
+        .clock(clk)
+    );
+    
+    always @ (posedge clk, posedge rst) begin
+        if (rst) begin
+            state <= INIT;
+            been_ready  <= 1'b0;
+            been_extend <= 1'b0;
+            been_break  <= 1'b0;
+            key <= 10'b0_0_0000_0000;
+        end else begin
+            state <= next_state;
+            been_ready  <= next_been_ready;
+            been_extend <= next_been_extend;
+            been_break  <= next_been_break;
+            key <= next_key;
+        end
+    end
+    
+    always @ (*) begin
+        case (state)
+            INIT:            next_state = (key_in == IS_INIT) ? WAIT_FOR_SIGNAL : INIT;
+            WAIT_FOR_SIGNAL: next_state = (valid == 1'b0) ? WAIT_FOR_SIGNAL : GET_SIGNAL_DOWN;
+            GET_SIGNAL_DOWN: next_state = WAIT_RELEASE;
+            WAIT_RELEASE:    next_state = (valid == 1'b1) ? WAIT_RELEASE : WAIT_FOR_SIGNAL;
+            default:         next_state = INIT;
+        endcase
+    end
+    always @ (*) begin
+        next_been_ready = been_ready;
+        case (state)
+            INIT:            next_been_ready = (key_in == IS_INIT) ? 1'b0 : next_been_ready;
+            WAIT_FOR_SIGNAL: next_been_ready = (valid == 1'b0) ? 1'b0 : next_been_ready;
+            GET_SIGNAL_DOWN: next_been_ready = 1'b1;
+            WAIT_RELEASE:    next_been_ready = next_been_ready;
+            default:         next_been_ready = 1'b0;
+        endcase
+    end
+    always @ (*) begin
+        next_been_extend = (is_extend) ? 1'b1 : been_extend;
+        case (state)
+            INIT:            next_been_extend = (key_in == IS_INIT) ? 1'b0 : next_been_extend;
+            WAIT_FOR_SIGNAL: next_been_extend = next_been_extend;
+            GET_SIGNAL_DOWN: next_been_extend = next_been_extend;
+            WAIT_RELEASE:    next_been_extend = (valid == 1'b1) ? next_been_extend : 1'b0;
+            default:         next_been_extend = 1'b0;
+        endcase
+    end
+    always @ (*) begin
+        next_been_break = (is_break) ? 1'b1 : been_break;
+        case (state)
+            INIT:            next_been_break = (key_in == IS_INIT) ? 1'b0 : next_been_break;
+            WAIT_FOR_SIGNAL: next_been_break = next_been_break;
+            GET_SIGNAL_DOWN: next_been_break = next_been_break;
+            WAIT_RELEASE:    next_been_break = (valid == 1'b1) ? next_been_break : 1'b0;
+            default:         next_been_break = 1'b0;
+        endcase
+    end
+    always @ (*) begin
+        next_key = key;
+        case (state)
+            INIT:            next_key = (key_in == IS_INIT) ? 10'b0_0_0000_0000 : next_key;
+            WAIT_FOR_SIGNAL: next_key = next_key;
+            GET_SIGNAL_DOWN: next_key = {been_extend, been_break, key_in};
+            WAIT_RELEASE:    next_key = next_key;
+            default:         next_key = 10'b0_0_0000_0000;
+        endcase
+    end
+
+    always @ (posedge clk, posedge rst) begin
+        if (rst) begin
+            key_valid <= 1'b0;
+            key_down <= 511'b0;
+        end else if (key_decode[last_change] && pulse_been_ready) begin
+            key_valid <= 1'b1;
+            if (key[8] == 0) begin
+                key_down <= key_down | key_decode;
+            end else begin
+                key_down <= key_down & (~key_decode);
+            end
+        end else begin
+            key_valid <= 1'b0;
+            key_down <= key_down;
+        end
+    end
+
+endmodule
