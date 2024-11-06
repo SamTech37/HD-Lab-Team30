@@ -96,6 +96,14 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/modules/Lab5_Team30_Music_fpga.v">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PSRCDIR/modules/Lab5_Team30_Booth_Multiplier_4bit.v">
         <FileInfo>
           <Attr Name="AutoDisabled" Val="1"/>
@@ -121,14 +129,6 @@
         </FileInfo>
       </File>
       <File Path="$PSRCDIR/tb/Lab5_Team30_Greatest_Common_Divisor_t.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/modules/Lab5_Team30_Music_fpga.v">
         <FileInfo>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
