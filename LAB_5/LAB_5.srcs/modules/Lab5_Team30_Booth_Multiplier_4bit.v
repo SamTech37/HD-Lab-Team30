@@ -1,7 +1,7 @@
 `timescale 1ns/1ps 
 
 // This is a bonus question
-module Booth_Multiplier_4bit(clk, rst_n, start, a, b, p);
+module Booth_Multiplier_4bit_ver1(clk, rst_n, start, a, b, p);
     input clk;
     input rst_n; 
     input start;
@@ -40,7 +40,11 @@ module Booth_Multiplier_4bit(clk, rst_n, start, a, b, p);
                         num_b <= b;
                         A <= {num_a, 5'b00000};
                         S <= {~num_a + 1'b1, 5'b00000}; 
+                        //here P won't get the intended value
+                        //since num_b is not set yet
+                        //the circuit runs in parallel
                         P <= {5'b0000, num_b, 1'b0};
+
                     end
                     else begin
                         num_a <= num_a;
