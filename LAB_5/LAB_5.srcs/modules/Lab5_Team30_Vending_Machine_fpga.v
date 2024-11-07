@@ -52,18 +52,19 @@ KeyInputDetector key_input(
     .key_F(key_F)//WATER
 );
 
- OnePulse op6(.clock(clk),.signal(key_A),.signal_single_pulse(drink_select[3]));
- OnePulse op7(.clock(clk),.signal(key_S),.signal_single_pulse(drink_select[2]));
- OnePulse op8(.clock(clk),.signal(key_D),.signal_single_pulse(drink_select[1]));
- OnePulse op9(.clock(clk),.signal(key_F),.signal_single_pulse(drink_select[0]));
-//assign drink_select[3] = key_A;
-//assign drink_select[2] = key_S;
-//assign drink_select[1] = key_D;
-//assign drink_select[0] = key_F;
+// OnePulse op6(.clock(clk),.signal(key_A),.signal_single_pulse(drink_select[3]));
+// OnePulse op7(.clock(clk),.signal(key_S),.signal_single_pulse(drink_select[2]));
+// OnePulse op8(.clock(clk),.signal(key_D),.signal_single_pulse(drink_select[1]));
+// OnePulse op9(.clock(clk),.signal(key_F),.signal_single_pulse(drink_select[0]));
+assign drink_select[3] = key_A;
+assign drink_select[2] = key_S;
+assign drink_select[1] = key_D;
+assign drink_select[0] = key_F;
 
 
 
 wire [8:0] cash;
+wire [2:0] state;
 Vending_Machine_FSM vendor(
     .clk(clk),
     .rst(rst),
@@ -73,9 +74,11 @@ Vending_Machine_FSM vendor(
     .insert_fifty(insert_fifty),
     .drink_select(drink_select), //change to key signals later
     .drink_avail(outLED),
-    .cash(cash));
+    .cash(cash),
+    .state(state)
+    );
 
-SevenSegmentDisplay ssd(.display(display),.digit(digit),.cash(cash),.rst(reset),.clk(clk));
+SevenSegmentDisplay ssd(.display(display),.digit(digit),.cash(cash),.rst(reset),.clk(clk),.state(state));
 
 endmodule
 
@@ -89,7 +92,8 @@ module Vending_Machine_FSM (
     input insert_fifty,
     input [3:0]drink_select,
     output [3:0]drink_avail,
-    output reg [8:0]cash 
+    output reg [8:0]cash,
+    output reg [2:0] state
 );
 
 
@@ -113,14 +117,14 @@ assign select = |(drink_select&drink_avail); //unary reduction operator
 
 
 
-reg [2-1:0] state, next_state;
+reg [2-1:0] next_state;
 parameter IDLE = 2'b00;//waiting for coins
 parameter BUY = 2'b01;//dispensing drink
 parameter CHANGE = 2'b10;//returning change
 
 reg [26-1:0] clock_divider;// ~1Hz clock
-always @(posedge clk, posedge rst) begin
-    if (rst) begin
+always @(posedge clk, posedge rst, posedge state[1], posedge state[0]) begin
+    if (rst || state[1] || state[0]) begin
         clock_divider <= 26'b0;
     end else begin
         clock_divider <= clock_divider + 26'b1;
@@ -136,49 +140,60 @@ if(rst) begin
 end
 else begin
     state <= next_state;
-    cash <= (next_cash > MAX) ? MAX : next_cash;
 
-   case(state)
-       BUY: begin
-           if(drink_select[3]&&drink_avail[3]) cash <= cash - COFFEE;
-           else if(drink_select[2]&&drink_avail[2]) cash <= cash - COKE;
-           else if(drink_select[1]&&drink_avail[1]) cash <= cash - OOLONG;
-           else if(drink_select[0]&&drink_avail[0]) cash <= cash - WATER;
-           else cash <= cash; //this case shouldn't happen
-       end
-       CHANGE: begin
-           if(clock_divider == {26{1'b1}} && cash>=CHANGE_UNIT) begin
-               cash <= cash - CHANGE_UNIT;
-           end else cash <= cash;
-       end
-       default: begin //IDLE
-           cash <= (next_cash > MAX) ? MAX : next_cash;
-       end
-   endcase 
+    case(state)
+    BUY, CHANGE: begin
+        if(clock_divider == {26{1'b1}} && cash>=CHANGE_UNIT) begin
+            cash <= cash - CHANGE_UNIT;
+        end else cash <= cash;
+    end
+    default: begin //IDLE
+        cash <= (next_cash > MAX) ? MAX : next_cash;
+    end
+    endcase 
 end
 end
 
 //comb
+//please refactor the FSM logic for
+//calculating & updating next_cash
+//the current BUY logic is flawed
 always @(*) begin
-    next_cash = cash + insert_five*5 + insert_ten*10 + insert_fifty*50;
-   case(state)
-       IDLE: begin
-           if(clear) next_state = CHANGE;
-           else begin
-               if ( select ) next_state = BUY;
-               else next_state = IDLE;
-           end 
-       end
-       BUY: begin
-           next_state = CHANGE;
-       end
-       CHANGE: begin
-           next_state = (cash == 0) ? IDLE : CHANGE;
-       end
-       default: begin
-           next_state = IDLE;
-       end
-   endcase
+case(state)
+    IDLE: begin
+        if(clear) begin
+            next_state = CHANGE;
+            next_cash = cash;
+        end
+        else begin
+            if ( select ) begin
+            next_state = BUY;
+
+            if(drink_select[3]&&drink_avail[3]) next_cash = cash - COFFEE;
+            else if(drink_select[2]&&drink_avail[2]) next_cash = cash - COKE;
+            else if(drink_select[1]&&drink_avail[1]) next_cash = cash - OOLONG;
+            else if(drink_select[0]&&drink_avail[0]) next_cash = cash - WATER;
+            else next_cash = cash;
+            end
+            else  begin
+            next_state = IDLE;
+            next_cash = cash + insert_five*5 + insert_ten*10 + insert_fifty*50;
+            end
+        end 
+    end
+    BUY: begin
+        next_state = CHANGE;
+        next_cash = cash;
+    end
+    CHANGE: begin
+        next_state = (cash == 0) ? IDLE : CHANGE;
+        next_cash = (cash >= CHANGE_UNIT) ? MIN : cash - CHANGE_UNIT;
+    end
+    default: begin
+        next_state = IDLE;
+        next_cash = cash;
+    end
+endcase
 end
 
 
@@ -240,7 +255,8 @@ module SevenSegmentDisplay(
     output reg [3:0] digit,//the rightmost 3 digits
     input wire [8:0] cash,
     input wire rst, //active high
-    input wire clk
+    input wire clk,
+    input wire [1:0] state
     );
     
     reg [15:0] clk_divider;
@@ -277,11 +293,11 @@ module SevenSegmentDisplay(
                     display_num <= nums[2];
                     digit <= 4'b1011;
                 end
-                // 4'b1011 : begin
-                //     display_num <= nums[15:12];
-                //     digit <= 4'b0111;
-                // end
-                4'b1011 : begin 
+                4'b1011 : begin //test
+                     display_num <= state;
+                     digit <= 4'b0111;
+                end
+                4'b0111 : begin 
                     display_num <= nums[0];
                     digit <= 4'b1110;
                 end
