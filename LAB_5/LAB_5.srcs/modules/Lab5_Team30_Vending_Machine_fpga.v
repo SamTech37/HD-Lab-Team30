@@ -64,7 +64,7 @@ assign drink_select[0] = key_F;
 
 
 wire [8:0] cash;
-wire [2:0] state;
+wire state;
 Vending_Machine_FSM vendor(
     .clk(clk),
     .rst(rst),
@@ -93,7 +93,7 @@ module Vending_Machine_FSM (
     input [3:0]drink_select,
     output [3:0]drink_avail,
     output reg [8:0]cash,
-    output reg [2:0] state
+    output reg state
 );
 
 
@@ -117,10 +117,9 @@ assign select = |(drink_select&drink_avail); //unary reduction operator
 
 
 
-reg [2-1:0] next_state;
-parameter IDLE = 2'b00;//waiting for coins
-parameter BUY = 2'b01;//dispensing drink
-parameter CHANGE = 2'b10;//returning change
+reg next_state;
+parameter IDLE = 1'b0;//waiting for coins or selection
+parameter CHANGE = 1'b1;//returning change
 
 reg [26-1:0] clock_divider;// ~1Hz clock
 always @(posedge clk, posedge rst) begin
@@ -141,19 +140,14 @@ end
 else begin
     state <= next_state;
 
-    case(state)
-    BUY: begin
-        cash <= cash; //do nothing
-    end 
-    CHANGE: begin
+    if (state == IDLE) begin
+        cash <= (next_cash > MAX) ? MAX : next_cash;
+    end
+    else begin //CHANGE
         if(clock_divider == {26{1'b1}} && cash>=CHANGE_UNIT) begin
             cash <= cash - CHANGE_UNIT;
         end else cash <= cash;
     end
-    default: begin //IDLE
-        cash <= (next_cash > MAX) ? MAX : next_cash;
-    end
-    endcase 
 end
 end
 
@@ -162,41 +156,19 @@ end
 //calculating & updating next_cash
 //the current BUY logic is flawed
 always @(*) begin
-case(state)
-    IDLE: begin
-        if(clear) begin
-            next_state = CHANGE;
-            next_cash = cash;
-        end
-        else begin
-            if ( select ) begin
-            next_state = BUY;
 
-            if(drink_select[3]&&drink_avail[3]) next_cash = cash - COFFEE;
-            else if(drink_select[2]&&drink_avail[2]) next_cash = cash - COKE;
-            else if(drink_select[1]&&drink_avail[1]) next_cash = cash - OOLONG;
-            else if(drink_select[0]&&drink_avail[0]) next_cash = cash - WATER;
-            else next_cash = cash;
-            end
-            else  begin
-            next_state = IDLE;
-            next_cash = cash + insert_five*5 + insert_ten*10 + insert_fifty*50;
-            end
-        end 
-    end
-    BUY: begin
-        next_state = CHANGE;
-        next_cash = cash;
-    end
-    CHANGE: begin
+    if(state == IDLE) begin
+        next_state = (clear || select) ? CHANGE : IDLE;
+        if(drink_select[3]&&drink_avail[3]) next_cash = cash - COFFEE;
+        else if(drink_select[2]&&drink_avail[2]) next_cash = cash - COKE;
+        else if(drink_select[1]&&drink_avail[1]) next_cash = cash - OOLONG;
+        else if(drink_select[0]&&drink_avail[0]) next_cash = cash - WATER;
+        else next_cash = cash + insert_five*5 + insert_ten*10 + insert_fifty*50;
+    end 
+    else begin //CHANGE
         next_state = (cash == 0) ? IDLE : CHANGE;
-        next_cash = (cash >= CHANGE_UNIT) ? MIN : cash - CHANGE_UNIT;
+        next_cash = (cash >= CHANGE_UNIT) ? MIN : cash - CHANGE_UNIT;//unused
     end
-    default: begin
-        next_state = IDLE;
-        next_cash = cash;
-    end
-endcase
 end
 
 
@@ -259,7 +231,7 @@ module SevenSegmentDisplay(
     input wire [8:0] cash,
     input wire rst, //active high
     input wire clk,
-    input wire [1:0] state
+    input wire state
     );
     
     reg [15:0] clk_divider;
