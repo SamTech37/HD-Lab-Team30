@@ -123,8 +123,8 @@ parameter BUY = 2'b01;//dispensing drink
 parameter CHANGE = 2'b10;//returning change
 
 reg [26-1:0] clock_divider;// ~1Hz clock
-always @(posedge clk, posedge rst, posedge state[1], posedge state[0]) begin
-    if (rst || state[1] || state[0]) begin
+always @(posedge clk, posedge rst) begin
+    if (rst) begin
         clock_divider <= 26'b0;
     end else begin
         clock_divider <= clock_divider + 26'b1;
@@ -142,7 +142,10 @@ else begin
     state <= next_state;
 
     case(state)
-    BUY, CHANGE: begin
+    BUY: begin
+        cash <= cash; //do nothing
+    end 
+    CHANGE: begin
         if(clock_divider == {26{1'b1}} && cash>=CHANGE_UNIT) begin
             cash <= cash - CHANGE_UNIT;
         end else cash <= cash;
