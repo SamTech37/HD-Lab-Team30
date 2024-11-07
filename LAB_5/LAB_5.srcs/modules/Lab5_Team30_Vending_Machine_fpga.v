@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 
 // [TODO]
-//fix BUY state in FSM
 
 
 module Vending_Machine_FPGA (
@@ -64,7 +63,7 @@ assign drink_select[0] = key_F;
 
 
 wire [8:0] cash;
-wire state;
+// wire state;
 Vending_Machine_FSM vendor(
     .clk(clk),
     .rst(rst),
@@ -74,11 +73,18 @@ Vending_Machine_FSM vendor(
     .insert_fifty(insert_fifty),
     .drink_select(drink_select), //change to key signals later
     .drink_avail(outLED),
-    .cash(cash),
-    .state(state)
+    .cash(cash)
+    // .state(state) //for tesing
     );
 
-SevenSegmentDisplay ssd(.display(display),.digit(digit),.cash(cash),.rst(reset),.clk(clk),.state(state));
+SevenSegmentDisplay ssd(
+    .display(display),
+    .digit(digit),
+    .cash(cash),
+    .rst(reset),
+    .clk(clk)
+    //.state(state)
+    );
 
 endmodule
 
@@ -92,8 +98,8 @@ module Vending_Machine_FSM (
     input insert_fifty,
     input [3:0]drink_select,
     output [3:0]drink_avail,
-    output reg [8:0]cash,
-    output reg state
+    output reg [8:0]cash
+    // output reg state
 );
 
 
@@ -116,7 +122,7 @@ wire select;//return 1 if any drink is selected and available
 assign select = |(drink_select&drink_avail); //unary reduction operator
 
 
-
+reg state;
 reg next_state;
 parameter IDLE = 1'b0;//waiting for coins or selection
 parameter CHANGE = 1'b1;//returning change
@@ -268,11 +274,11 @@ module SevenSegmentDisplay(
                     display_num <= nums[2];
                     digit <= 4'b1011;
                 end
-                4'b1011 : begin //test
-                     display_num <= state;
-                     digit <= 4'b0111;
-                end
-                4'b0111 : begin 
+                // 4'b1011 : begin //test
+                //      display_num <= state;
+                //      digit <= 4'b0111;
+                // end
+                4'b1011 : begin 
                     display_num <= nums[0];
                     digit <= 4'b1110;
                 end
