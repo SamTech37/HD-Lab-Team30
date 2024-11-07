@@ -1,7 +1,5 @@
 `timescale 1ns/1ps
 
-// [TODO]
-
 
 module Vending_Machine_FPGA (
 inout wire PS2_DATA,//use keyboard A,S,D,F for selecting the item
