@@ -1,4 +1,4 @@
-module clock_divisor(clk1, clk, clk22);
+module image_clock_divisor(clk1, clk, clk22);
 input clk;
 output clk1;
 output clk22;

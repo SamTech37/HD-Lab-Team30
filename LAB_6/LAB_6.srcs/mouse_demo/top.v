@@ -26,13 +26,13 @@ module mousetop(
     
     wire [11:0] mouse_pixel = {mouse_cursor_red, mouse_cursor_green, mouse_cursor_blue};
 
-    clock_divisor clk_wiz_0_inst(
+    mouse_clock_divisor clk_wiz_0_inst(
       .clk(clk),
       .clk1(clk_25MHz),
       .clk17(clk_segment)
     );
 
-   pixel_gen pixel_gen_inst(
+   mouse_pixel_gen pixel_gen_inst(
        .h_cnt(h_cnt),
        .MOUSE_X_POS(MOUSE_X_POS),
        .valid(valid),

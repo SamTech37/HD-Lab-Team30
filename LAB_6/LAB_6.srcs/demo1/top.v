@@ -15,12 +15,12 @@ module VGAColortop(
     wire [9:0] v_cnt;  //480
 
 
-     clock_divisor clk_wiz_0_inst(
+     Color_clock_divisor clk_wiz_0_inst(
       .clk(clk),
       .clk1(clk_25MHz)
     );
 
-   pixel_gen pixel_gen_inst(
+   Color_pixel_gen pixel_gen_inst(
        .h_cnt(h_cnt),
        .valid(valid),
        .vgaRed(vgaRed),

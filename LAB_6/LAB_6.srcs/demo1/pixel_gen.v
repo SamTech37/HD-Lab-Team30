@@ -1,4 +1,4 @@
-module pixel_gen(
+module Color_pixel_gen(
    input [9:0] h_cnt,
    input valid,
    output reg [3:0] vgaRed,

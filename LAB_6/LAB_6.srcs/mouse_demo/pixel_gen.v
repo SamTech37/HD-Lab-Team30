@@ -1,4 +1,4 @@
-module pixel_gen(
+module mouse_pixel_gen(
    input [9:0] h_cnt,
    input [9:0] MOUSE_X_POS,
    input valid,

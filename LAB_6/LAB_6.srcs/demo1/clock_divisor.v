@@ -1,4 +1,4 @@
-module clock_divisor(clk1, clk);
+module Color_clock_divisor(clk1, clk);
 input clk;
 output clk1;
 

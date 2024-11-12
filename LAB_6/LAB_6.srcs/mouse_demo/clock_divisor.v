@@ -1,4 +1,4 @@
-module clock_divisor(clk17, clk1, clk);
+module mouse_clock_divisor(clk17, clk1, clk);
 input clk;
 output clk1;
 output clk17;

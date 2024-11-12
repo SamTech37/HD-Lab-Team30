@@ -19,7 +19,7 @@ module VGA_imagetop(
 
   assign {vgaRed, vgaGreen, vgaBlue} = (valid==1'b1) ? pixel:12'h0;
 
-     clock_divisor clk_wiz_0_inst(
+     image_clock_divisor clk_wiz_0_inst(
       .clk(clk),
       .clk1(clk_25MHz),
       .clk22(clk_22)
