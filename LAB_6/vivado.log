@@ -66,3 +66,10 @@ INFO: [IP_Flow 19-234] Refreshing IP repositories
 INFO: [IP_Flow 19-1704] No user IP repositories specified
 INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2022.2/data/ip'.
 open_project: Time (s): cpu = 00:00:17 ; elapsed = 00:00:14 . Memory (MB): peak = 1147.727 ; gain = 183.938
+add_files {C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/Ps2Interface.vhd C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/top.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/MouseDisplay.vhd C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/Mouse.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/MouseCtl.vhd C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/SegmentDisplay.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/pixel_gen.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/clock_divisor.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/mouse_demo/vga.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo2/top.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo2/mem_addr_gen.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo2/vga.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo2/clock_divisor.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo1/vga.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo1/clock_divisor.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo1/top.v C:/NTHU/Sophomore_I/HardWare/hdl/HD-Lab-Team30/LAB_6/LAB_6.srcs/demo1/pixel_gen.v}
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
