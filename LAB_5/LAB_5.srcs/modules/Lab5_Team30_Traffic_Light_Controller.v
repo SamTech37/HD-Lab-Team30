@@ -8,7 +8,7 @@ output [2:0] lr_light;
 reg [2:0] hw_light, lr_light;
 reg [2:0] state;
 reg [2:0] next_state;
-reg [6:0] count;
+reg [64-1:0] count;
 //to prevent the count signal show at sequentail and combinational always
 reg count_reset;
 parameter A = 3'b000;

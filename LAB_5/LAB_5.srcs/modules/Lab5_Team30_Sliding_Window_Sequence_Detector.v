@@ -27,7 +27,7 @@ always @(*) begin
     S1: next_state = in ? S2:S0;
     S2: next_state = in ? S3:S0;
     S3: next_state = in ? S3:S4;
-    S4: next_state = in ? S0:S5;
+    S4: next_state = in ? S1:S5;
     S5: next_state = in ? S6:S0;
     S6: next_state = in ? S7:S5;
     S7: next_state = in ? S3:S0;

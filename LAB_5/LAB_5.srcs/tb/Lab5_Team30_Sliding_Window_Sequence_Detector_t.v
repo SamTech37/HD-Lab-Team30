@@ -19,7 +19,7 @@ Sliding_Window_Sequence_Detector SWSD (
 parameter cyc = 10;
 always #(cyc/2) clk = ~clk;
     
-reg [0:20-1] test_pattern = 20'b1110_0101_0111_1001_0111;
+reg [0:20-1] test_pattern = 20'b1110_1110_0111_1101_0101;
 integer i;
 
 initial begin
