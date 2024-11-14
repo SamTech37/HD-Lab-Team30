@@ -38,5 +38,7 @@ set_property PACKAGE_PIN C17 [get_ports PS2_CLK]
 set_property PACKAGE_PIN B17 [get_ports PS2_DATA]
 
 
-set_property IOSTANDARD LVCMOS33 [get_ports start]
-set_property PACKAGE_PIN T17 [get_ports start]
+set_property IOSTANDARD LVCMOS33 [get_ports start_l]
+set_property PACKAGE_PIN T17 [get_ports start_l]
+set_property IOSTANDARD LVCMOS33 [get_ports start_r]
+set_property PACKAGE_PIN W19 [get_ports start_r]
