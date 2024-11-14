@@ -4,11 +4,10 @@
 `define MID 10'd2
 `define SLOW 10'd1
 
-module Top(clk, rst, start, vgaRed, vgaBlue, vgaGreen, hsync, vsync);
-	input clk, rst, start;//button
+module Top(clk, rst, start_r, start_l, vgaRed, vgaBlue, vgaGreen, hsync, vsync, LEDU, LEDD);
+	input clk, rst, start_r, start_l;//button
     output [3:0] vgaRed, vgaGreen, vgaBlue;
     output hsync, vsync;
-	
 	wire clk_d2;//25MHz
     wire clk_d22;
     wire [16:0] pixel_addr;
@@ -21,9 +20,9 @@ module Top(clk, rst, start, vgaRed, vgaBlue, vgaGreen, hsync, vsync);
 	wire [9:0] A_v_count, B_v_count, C_v_count;
 	wire run;
 	//signals
-	wire start_db, rst_db;
-	wire start_op, rst_op;
-	
+	wire start__r_db, start_l_db, rst_db;
+	wire start_r_op, start_l_op, rst_op;
+
 	assign h_cnt_re = h_cnt>>1;
 	assign v_cnt_re = v_cnt>>1;
 	
@@ -34,20 +33,24 @@ module Top(clk, rst, start, vgaRed, vgaBlue, vgaGreen, hsync, vsync);
 	clk_div #(19) CD1(.clk(clk), .clk_d(clk_d22));
 	
 	//signals
-	debounce DB0(.s(start), .s_db(start_db), .clk(clk));
+	debounce DB0(.s(start_r), .s_db(start_r_db), .clk(clk));
+	debounce DB2(.s(start_l), .s_db(start_l_db), .clk(clk));
 	debounce DB1(.s(rst), .s_db(rst_db), .clk(clk));
-	onepulse OP0(.s(start_db), .s_op(start_op), .clk(clk_d22));
+	onepulse OP0(.s(start_r_db), .s_op(start_r_op), .clk(clk_d22));
+	onepulse OP2(.s(start_l_db), .s_op(start_l_op), .clk(clk_d22));
 	onepulse OP1(.s(rst_db), .s_op(rst_op), .clk(clk_d22));
 	
 	//control
-	// state_control_downward SC0(
-	// 	.clk(clk_d22),
-	// 	.rst(rst_op),
-	// 	.start(start_op),
-	// 	.A_v_count(A_v_count),
-	// 	.B_v_count(B_v_count),
-	// 	.C_v_count(C_v_count)
-	// );
+	state_control SC0(
+		.clk(clk_d22),
+		.rst(rst_op),
+		.start_r(start_r_op),
+		.start_l(start_l_op),
+		.A_v_count(A_v_count),
+		.B_v_count(B_v_count),
+		.C_v_count(C_v_count),
+	);
+	/*
 	state_control_upward SC1(
 		.clk(clk_d22),
 		.rst(rst_op),
@@ -55,7 +58,7 @@ module Top(clk, rst, start, vgaRed, vgaBlue, vgaGreen, hsync, vsync);
 		.A_v_count(A_v_count),
 		.B_v_count(B_v_count),
 		.C_v_count(C_v_count)
-	);
+	);*/
 
 	mem_addr_gen MAG(
 		.h_cnt(h_cnt_re),
@@ -123,9 +126,11 @@ module clk_div #(parameter n = 2)(clk, clk_d);
 	assign clk_d = count[n-1];
 endmodule
 
-module state_control_downward(clk, rst, start, A_v_count, B_v_count, C_v_count);
-	input clk, rst, start;
-	
+module state_control(clk, rst, start_r, start_l, A_v_count, B_v_count, C_v_count);
+	input clk, rst, start_r, start_l;
+	wire start;
+	reg nextdirec;
+	reg direc;
 	reg [9:0]A_state, B_state, C_state; 
 	wire [9:0]next_A_state, next_B_state, next_C_state;
 	
@@ -136,8 +141,10 @@ module state_control_downward(clk, rst, start, A_v_count, B_v_count, C_v_count);
 	wire [9:0]next_A_v_count, next_B_v_count, next_C_v_count;
 	
 	reg [9:0]A_to, B_to, C_to;
-	
+
+	assign start = start_r | start_l;
 	always@(posedge clk)begin
+		direc <= nextdirec;
 		if(rst)begin
 			A_state <= `STOP;
 			B_state <= `STOP;
@@ -158,6 +165,11 @@ module state_control_downward(clk, rst, start, A_v_count, B_v_count, C_v_count);
 		end
 	end
 	
+	always@(*)begin
+		if(start_r && !start_l) nextdirec = 1;
+		else if(!start_r && start_l) nextdirec = 0;
+		else nextdirec = direc;
+	end
 	always@(*)begin
 		case(C_state)
 			`STOP:begin
@@ -212,12 +224,18 @@ module state_control_downward(clk, rst, start, A_v_count, B_v_count, C_v_count);
 	assign next_B_state = B_to;
 	assign next_A_state = A_to;
 	
-	assign next_A_v_count = (A_v_count + A_state >= 10'd240)? A_v_count + A_state - 10'd240: A_v_count + A_state;
-	assign next_B_v_count = (B_v_count + B_state >= 10'd240)? B_v_count + B_state - 10'd240: B_v_count + B_state;
-	assign next_C_v_count = (C_v_count + C_state >= 10'd240)? C_v_count + C_state - 10'd240: C_v_count + C_state;
+	assign next_A_v_count = direc? ((A_v_count + A_state >= 10'd240)? A_v_count + A_state - 10'd240: A_v_count + A_state) 
+	: ((A_v_count - A_state >= 10'd240)? A_v_count - A_state + 10'd240: A_v_count - A_state);
+
+	assign next_B_v_count = direc? ((B_v_count + B_state >= 10'd240)? B_v_count + B_state - 10'd240: B_v_count + B_state) 
+	: ((B_v_count - B_state >= 10'd240)? B_v_count - B_state + 10'd240: B_v_count - B_state);
+
+	assign next_C_v_count = direc? ((C_v_count + C_state >= 10'd240)? C_v_count + C_state - 10'd240: C_v_count + C_state) 
+	: ((C_v_count - C_state >= 10'd240)? C_v_count - C_state + 10'd240: C_v_count - C_state);
 		
 endmodule
 
+/*
 module state_control_upward(clk, rst, start, A_v_count, B_v_count, C_v_count);
 	input clk, rst, start;
 	
@@ -319,7 +337,7 @@ module state_control_upward(clk, rst, start, A_v_count, B_v_count, C_v_count);
 	assign next_C_v_count = (C_v_count - C_state >= 10'd240)? C_v_count - C_state + 10'd240: C_v_count - C_state;
 	
 		
-endmodule
+endmodule*/
 
 module mem_addr_gen(h_cnt, v_cnt, A_v_count, B_v_count, C_v_count, pixel_addr);
     input [9:0] h_cnt, v_cnt;
