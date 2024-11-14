@@ -1,3 +1,5 @@
+## For Chip2Chip slave board
+
 set_property IOSTANDARD LVCMOS33 [get_ports {AN[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {AN[2]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {AN[1]}]

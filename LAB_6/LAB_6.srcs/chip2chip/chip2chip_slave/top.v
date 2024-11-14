@@ -6,7 +6,7 @@
 // Create Date: 2019/08/25 12:47:53
 // Module Name: top
 // Project Name: Chip2Chip
-// Additional Comments: top module for master, pass signals and perform debounce onepulse
+// Additional Comments: top module for slave, pass signals and perform debounce onepulse
 //////////////////////////////////////////////////////////////////////////////////
 module debounce (pb_debounced, pb, clk);
 	output pb_debounced; // signal of a pushbutton after being debounced
@@ -32,7 +32,7 @@ module onepulse (pb_debounced, clock, pb_one_pulse);
 	end
 endmodule
 
-module top(clk, rst_n, request, valid, seven_seg, notice_slave, AN, data_in, ack);
+module slave_end(clk, rst_n, request, valid, seven_seg, notice_slave, AN, data_in, ack);
     input clk;
     input rst_n;
     input [3-1:0]data_in;

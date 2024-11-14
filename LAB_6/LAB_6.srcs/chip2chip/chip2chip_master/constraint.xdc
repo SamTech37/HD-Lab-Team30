@@ -1,3 +1,5 @@
+## For Chip2Chip Master board
+
 set_property IOSTANDARD LVCMOS33 [get_ports {data_to_slave_o[2]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {data_to_slave_o[1]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {data_to_slave_o[0]}]

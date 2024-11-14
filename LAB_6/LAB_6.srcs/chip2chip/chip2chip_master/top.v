@@ -33,7 +33,7 @@ module onepulse (pb_debounced, clock, pb_one_pulse);
 	end
 endmodule
 
-module top(clk, rst_n, in, request, notice_master, data_to_slave_o, valid, request2s, ack, seven_seg, AN);
+module master_end(clk, rst_n, in, request, notice_master, data_to_slave_o, valid, request2s, ack, seven_seg, AN);
     input clk;
     input rst_n;
     input [8-1:0] in;
