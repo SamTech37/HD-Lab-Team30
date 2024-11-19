@@ -4,7 +4,7 @@
 `define MID 10'd2
 `define SLOW 10'd1
 
-module Top(clk, rst, start_r, start_l, vgaRed, vgaBlue, vgaGreen, hsync, vsync, LEDU, LEDD);
+module Top(clk, rst, start_r, start_l, vgaRed, vgaBlue, vgaGreen, hsync, vsync);
 	input clk, rst, start_r, start_l;//button
     output [3:0] vgaRed, vgaGreen, vgaBlue;
     output hsync, vsync;
@@ -48,7 +48,7 @@ module Top(clk, rst, start_r, start_l, vgaRed, vgaBlue, vgaGreen, hsync, vsync, 
 		.start_l(start_l_op),
 		.A_v_count(A_v_count),
 		.B_v_count(B_v_count),
-		.C_v_count(C_v_count),
+		.C_v_count(C_v_count)
 	);
 	/*
 	state_control_upward SC1(
@@ -219,7 +219,8 @@ module state_control(clk, rst, start_r, start_l, A_v_count, B_v_count, C_v_count
 		endcase
 	end
 	
-	assign next_counter = ((start==1'b0 && counter==10'd0) || (counter >= 10'd1000))? counter : counter+1'b1;
+	assign next_counter = ((A_state == `STOP && counter >= 10'd359) && (B_state == `STOP && counter >= 10'd799) && (C_state == `STOP && counter >= 10'd959)) == 1'b1 ? 
+	1'b0 : (((start==1'b0 && counter==10'd0) || (counter >= 10'd1000))? counter : counter+1'b1);
 	assign next_C_state = C_to;
 	assign next_B_state = B_to;
 	assign next_A_state = A_to;
@@ -234,110 +235,6 @@ module state_control(clk, rst, start_r, start_l, A_v_count, B_v_count, C_v_count
 	: ((C_v_count - C_state >= 10'd240)? C_v_count - C_state + 10'd240: C_v_count - C_state);
 		
 endmodule
-
-/*
-module state_control_upward(clk, rst, start, A_v_count, B_v_count, C_v_count);
-	input clk, rst, start;
-	
-	reg [9:0]A_state, B_state, C_state; 
-	wire [9:0]next_A_state, next_B_state, next_C_state;
-	
-	reg [9:0]counter;
-	wire [9:0]next_counter;
-	
-	output reg [9:0]A_v_count, B_v_count, C_v_count;
-	wire [9:0]next_A_v_count, next_B_v_count, next_C_v_count;
-	
-	reg [9:0]A_to, B_to, C_to;
-	//FSM logic
-	
-	always@(posedge clk)begin
-		if(rst)begin
-			A_state <= `STOP;
-			B_state <= `STOP;
-			C_state <= `STOP;
-			counter <= 10'd0;
-			A_v_count <= 10'd0;
-			B_v_count <= 10'd0;
-			C_v_count <= 10'd0;
-		end
-		else begin
-			A_state <= next_A_state;
-			B_state <= next_B_state;
-			C_state <= next_C_state;
-			counter <= next_counter;
-			A_v_count <= next_A_v_count;
-			B_v_count <= next_B_v_count;
-			C_v_count <= next_C_v_count;
-		end
-	end
-
-	//generate next states and counts
-	
-	always@(*)begin
-		case(C_state)
-			`STOP:begin
-				C_to = (start==1'b1 && counter==10'd0)? `SLOW : `STOP;
-			end
-			`SLOW:begin
-				C_to = (counter>=10'd959)? `STOP : (counter>=10'd239 && counter<10'd359)? `MID : `SLOW;
-			end
-			`MID:begin
-				C_to = (counter>=10'd719)? `SLOW : (counter>=10'd359 && counter<10'd599)? `FAST : `MID;
-			end
-			`FAST:begin
-				C_to = (counter>=10'd599)? `MID : `FAST;
-			end
-		endcase
-	end
-	always@(*)begin
-		case(B_state)
-			`STOP:begin
-				B_to = (start==1'b1 && counter==10'd0)? `SLOW : `STOP;
-			end
-			`SLOW:begin
-				B_to = (counter>=10'd799)? `STOP : (counter>=10'd239 && counter<10'd359)? `MID : `SLOW;
-			end
-			`MID:begin
-				B_to = (counter>=10'd559)? `SLOW : (counter>=10'd359 && counter<10'd439)? `FAST : `MID;
-			end
-			`FAST:begin
-				B_to = (counter>=10'd439)? `MID : `FAST;
-			end
-		endcase
-	end
-	always@(*)begin
-		case(A_state)
-			`STOP:begin
-				A_to = (start==1'b1 && counter==10'd0)? `SLOW : `STOP;
-			end
-			`SLOW:begin
-				A_to = (counter>=10'd599)? `STOP : (counter>=10'd239 && counter<10'd359)? `MID : `SLOW;
-			end
-			`MID:begin
-				A_to = (counter>=10'd359)? `SLOW : `MID;
-			end
-			`FAST:begin
-				A_to = `STOP;
-			end
-		endcase
-	end
-
-	//calculate pixels to read from
-	
-	assign next_counter = ((start==1'b0 && counter==10'd0) || (counter >= 10'd1000))? counter : counter+1'b1;
-	assign next_C_state = C_to;
-	assign next_B_state = B_to;
-	assign next_A_state = A_to;
-	//the only part modified
-	//times the speed/difference by -1 to 
-	//get the effect of opposite direction
-	assign next_A_v_count = (A_v_count - A_state >= 10'd240)? A_v_count - A_state + 10'd240: A_v_count - A_state;
-	assign next_B_v_count = (B_v_count - B_state >= 10'd240)? B_v_count - B_state + 10'd240: B_v_count - B_state;
-	assign next_C_v_count = (C_v_count - C_state >= 10'd240)? C_v_count - C_state + 10'd240: C_v_count - C_state;
-	
-		
-endmodule*/
 
 module mem_addr_gen(h_cnt, v_cnt, A_v_count, B_v_count, C_v_count, pixel_addr);
     input [9:0] h_cnt, v_cnt;
