@@ -1,7 +1,7 @@
 module motor(
     input clk,
     input rst,
-    // input [?? :0]mode,
+    input [1:0]mode,
     output  [1:0]pwm
 );
 

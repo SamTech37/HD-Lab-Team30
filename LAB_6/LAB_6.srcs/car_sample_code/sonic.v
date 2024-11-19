@@ -2,7 +2,7 @@ module sonic_top(clk, rst, Echo, Trig, stop);
 	input clk, rst, Echo;
 	output Trig, stop;
 
-	wire[19:0] dis;
+	wire[19:0] dis; //20-bit distance, unit = 0.1mm
 	wire[19:0] d;
     wire clk1M;
 	wire clk_2_17;

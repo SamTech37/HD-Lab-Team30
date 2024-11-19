@@ -12,32 +12,33 @@ module Top(
     output reg [1:0]right
 );
 
-    wire Rst_n, rst_pb, stop;
-    debounce d0(rst_pb, rst, clk);
-    onepulse d1(rst_pb, clk, Rst_n);
+    wire [1:0] state;
+    wire reset, rst_db, stop;
+    debounce d0(.pb_debounced(rst_db), .pb(rst), .clk(clk));
+    onepulse d1(.PB_debounced(rst_db), .clk(clk), .PB_one_pulse(reset));
 
     motor A(
-        .clk(),
-        .rst(),
-        //.mode(),
+        .clk(clk),
+        .rst(reset),
+        .mode(state),
         .pwm()
     );
 
     sonic_top B(
-        .clk(), 
-        .rst(), 
-        .Echo(), 
-        .Trig(),
-        .stop()
+        .clk(clk), 
+        .rst(reset), 
+        .Echo(echo), 
+        .Trig(trig),
+        .stop(stop)
     );
     
     tracker_sensor C(
-        .clk(), 
-        .reset(), 
-        .left_signal(), 
-        .right_signal(),
-        .mid_signal(), 
-        //.state()
+        .clk(clk), 
+        .reset(reset), 
+        .left_signal(left_signal), 
+        .right_signal(right_signal),
+        .mid_signal(mid_signal), 
+        .state(state)
        );
 
     always @(*) begin
