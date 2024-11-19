@@ -1,12 +1,12 @@
 module Top(
     input clk,
     input rst,
-    input echo,
-    input left_signal,
+    input echo, //from sonic sensor
+    input left_signal, //from tracker sensor
     input right_signal,
     input mid_signal,
-    output trig,
-    output left_motor,
+    output trig, //to sonic sensor
+    output left_motor, //to motor driver
     output reg [1:0]left,
     output right_motor,
     output reg [1:0]right
