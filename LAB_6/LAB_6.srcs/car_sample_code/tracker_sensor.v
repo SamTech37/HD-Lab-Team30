@@ -1,4 +1,10 @@
 `timescale 1ns/1ps
+
+parameter STOP = 2'b00;
+parameter LEFT = 2'b01;
+parameter RIGHT = 2'b10;
+parameter FORWARD = 2'b11;
+
 module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     input clk;
     input reset;
@@ -11,10 +17,7 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     assign mid = ~mid_signal;
 
     reg [1:0] next_state;
-    parameter STOP = 2'b00;
-    parameter LEFT = 2'b01;
-    parameter RIGHT = 2'b10;
-    parameter FORWARD = 2'b11;
+    
 
     // [TO-DO] Receive three signals and make your own policy.
     // Hint: You can use output state to change your action.

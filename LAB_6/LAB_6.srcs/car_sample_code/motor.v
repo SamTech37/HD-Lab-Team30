@@ -1,3 +1,8 @@
+
+parameter MaxDuty = 10'd400;
+parameter TurnSpeed = 10'd100;
+
+
 module motor(
     input clk,
     input rst,
@@ -23,6 +28,31 @@ module motor(
     end
     
     // [TO-DO] take the right speed for different situation
+
+    always @(*) begin
+        case(mode)
+            STOP:
+                begin
+                    next_left_motor = 10'd0;
+                    next_right_motor = 10'd0;
+                end
+            LEFT:
+                begin
+                    next_left_motor = TurnSpeed;
+                    next_right_motor = MaxDuty;
+                end
+            RIGHT:
+                begin
+                    next_left_motor = MaxDuty;
+                    next_right_motor = TurnSpeed;
+                end
+            FORWARD:
+                begin
+                    next_left_motor = MaxDuty;
+                    next_right_motor = MaxDuty;
+                end
+        endcase
+    end
 
 
     assign pwm = {left_pwm, right_pwm};
@@ -54,7 +84,8 @@ module PWM_gen (
     output reg PWM
 );
     wire [31:0] count_max = 32'd100_000_000 / freq;
-    wire [31:0] count_duty = count_max * duty / 32'd1024;
+    //duty / 1024 = duty cycle, max 40%
+    wire [31:0] count_duty = count_max * duty / 32'd1024; 
     reg [31:0] count;
         
     always @(posedge clk, posedge reset) begin

@@ -6,8 +6,8 @@ module Top(
     input right_signal,
     input mid_signal,
     output trig, //to sonic sensor
-    output left_motor, //to motor driver
-    output reg [1:0]left,
+    output left_motor, //pwm for left motor
+    output reg [1:0]left,//spin direction for left motor
     output right_motor,
     output reg [1:0]right
 );
@@ -17,11 +17,12 @@ module Top(
     debounce d0(.pb_debounced(rst_db), .pb(rst), .clk(clk));
     onepulse d1(.PB_debounced(rst_db), .clk(clk), .PB_one_pulse(reset));
 
+
     motor A(
         .clk(clk),
         .rst(reset),
         .mode(state),
-        .pwm()
+        .pwm({left_motor, right_motor})
     );
 
     sonic_top B(
@@ -40,12 +41,13 @@ module Top(
         .mid_signal(mid_signal), 
         .state(state)
        );
-
+    // [DONE] Use left and right to set your motor's spinning direction
     always @(*) begin
-        // [TO-DO] Use left and right to set your pwm
-        //if(stop) {left, right} = ???;
-        //else  {left, right} = ???;
+        
+        if(stop) {left, right} = 4'b0000; //stop
+        else  {left, right} = 4'b1010; //go forward
     end
+
 
 endmodule
 
