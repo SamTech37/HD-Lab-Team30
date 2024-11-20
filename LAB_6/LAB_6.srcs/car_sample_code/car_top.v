@@ -3,6 +3,9 @@
 `define RIGHT  2'b10
 `define FORWARD  2'b11
 
+//[TODO]
+//LED debug for motor mode(direction)
+//charge the battery
 
 module CarTop(
     input clk,
