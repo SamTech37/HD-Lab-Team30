@@ -19,7 +19,7 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     reg [1:0] next_state;
     
 
-    // [TO-DO] Receive three signals and make your own policy.
+    // [Done] Receive three signals and make your own policy.
     // Hint: You can use output state to change your action.
 
     always @(posedge clk) begin

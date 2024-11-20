@@ -27,7 +27,7 @@ module motor(
         end
     end
     
-    // [TO-DO] take the right speed for different situation
+    // [Done] take the right speed for different situation
 
     always @(*) begin
         case(mode)
