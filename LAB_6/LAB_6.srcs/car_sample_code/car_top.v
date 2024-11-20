@@ -1,4 +1,10 @@
-module Top(
+`define STOP  2'b00
+`define LEFT  2'b01
+`define RIGHT  2'b10
+`define FORWARD  2'b11
+
+
+module CarTop(
     input clk,
     input rst,
     input echo, //from sonic sensor

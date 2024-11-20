@@ -1,9 +1,5 @@
 `timescale 1ns/1ps
-
-parameter STOP = 2'b00;
-parameter LEFT = 2'b01;
-parameter RIGHT = 2'b10;
-parameter FORWARD = 2'b11;
+`include "car_top.v"
 
 module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     input clk;
@@ -24,7 +20,7 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
 
     always @(posedge clk) begin
         if(reset) begin //active-high reset
-            state <= STOP;
+            state <= `STOP;
         end else begin
             state <= next_state;
         end
@@ -34,11 +30,11 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     //maybe add sharp turn left & sharp turn right later
     always @(*) begin
         if(left && !right && !mid) begin
-            next_state = LEFT;
+            next_state = `LEFT;
         end else if(!left && right && !mid) begin
-            next_state = RIGHT;
+            next_state = `RIGHT;
         end else begin
-            next_state = FORWARD;
+            next_state = `FORWARD;
         end
     end
 

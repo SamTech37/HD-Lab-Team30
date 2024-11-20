@@ -1,7 +1,7 @@
 
 parameter MaxDuty = 10'd400;
 parameter TurnSpeed = 10'd100;
-
+`include "car_top.v"
 
 module motor(
     input clk,
@@ -31,22 +31,22 @@ module motor(
 
     always @(*) begin
         case(mode)
-            STOP:
+            `STOP:
                 begin
                     next_left_motor = 10'd0;
                     next_right_motor = 10'd0;
                 end
-            LEFT:
+            `LEFT:
                 begin
                     next_left_motor = TurnSpeed;
                     next_right_motor = MaxDuty;
                 end
-            RIGHT:
+            `RIGHT:
                 begin
                     next_left_motor = MaxDuty;
                     next_right_motor = TurnSpeed;
                 end
-            FORWARD:
+            `FORWARD:
                 begin
                     next_left_motor = MaxDuty;
                     next_right_motor = MaxDuty;
