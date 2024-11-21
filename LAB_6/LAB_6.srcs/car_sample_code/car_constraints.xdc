@@ -193,26 +193,26 @@ set_property IOSTANDARD LVCMOS33 [get_ports {trig}]
 
 ##Pmod Header JC
 ##Sch name = JC1
-set_property PACKAGE_PIN K17 [get_ports {left[0]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {left[0]}]
+set_property PACKAGE_PIN K17 [get_ports {right[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {right[0]}]
 ##Sch name = JC2
-set_property PACKAGE_PIN M18 [get_ports {left[1]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {left[1]}]
+set_property PACKAGE_PIN M18 [get_ports {right[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {right[1]}]
 ##Sch name = JC3
-set_property PACKAGE_PIN N17 [get_ports {left_motor}]
-set_property IOSTANDARD LVCMOS33 [get_ports {left_motor}]
+set_property PACKAGE_PIN N17 [get_ports {right_motor}]
+set_property IOSTANDARD LVCMOS33 [get_ports {right_motor}]
 ##Sch name = JC4
 #set_property PACKAGE_PIN P18 [get_ports {JC[3]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JC[3]}]
 ##Sch name = JC7
-set_property PACKAGE_PIN L17 [get_ports {right_motor}]
-set_property IOSTANDARD LVCMOS33 [get_ports {right_motor}]
+set_property PACKAGE_PIN L17 [get_ports {left_motor}]
+set_property IOSTANDARD LVCMOS33 [get_ports {left_motor}]
 ##Sch name = JC8
-set_property PACKAGE_PIN M19 [get_ports {right[0]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {right[0]}]
+set_property PACKAGE_PIN M19 [get_ports {left[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {left[0]}]
 #Sch name = JC9
-set_property PACKAGE_PIN P17 [get_ports {right[1]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {right[1]}]
+set_property PACKAGE_PIN P17 [get_ports {left[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {left[1]}]
 ##Sch name = JC10
 #set_property PACKAGE_PIN R18 [get_ports {JC[7]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JC[7]}]
