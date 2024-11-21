@@ -16,9 +16,9 @@ module CarTop(
     input mid_signal,
     output trig, //to sonic sensor
     output left_motor, //pwm for left motor
-    output reg [1:0]left,//spin direction for left motor
+    output reg [1:0]left,//spin direction for left motor, = {IN1, IN2}
     output right_motor,
-    output reg [1:0]right
+    output reg [1:0]right// {IN3,IN4}
 );
 
     wire [1:0] state;

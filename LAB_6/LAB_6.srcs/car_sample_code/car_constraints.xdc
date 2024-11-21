@@ -161,13 +161,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports {rst}]
 
 
 ##Pmod Header JB 
-    input left_signal, //from tracker sensor
-    input right_signal,
-    input mid_signal,
+    # input left_signal, //from tracker sensor
+    # input right_signal,
+    # input mid_signal,
 ##Sch name = JB1
-set_property PACKAGE_PIN A14 [get_ports {pmod_1}]
-    set_property IOSTANDARD LVCMOS33 [get_ports {pmod_1}]
-##Sch name = JB2
+# set_property PACKAGE_PIN A14 [get_ports {pmod_1}]
+#     set_property IOSTANDARD LVCMOS33 [get_ports {pmod_1}]
+# ##Sch name = JB2
 set_property PACKAGE_PIN A16 [get_ports {right_signal}]
     set_property IOSTANDARD LVCMOS33 [get_ports {right_signal}]
 ##Sch name = JB3
@@ -285,12 +285,12 @@ set_property IOSTANDARD LVCMOS33 [get_ports {left[1]}]
 
 
 ##USB HID (PS/2)
-set_property PACKAGE_PIN C17 [get_ports PS2_CLK]						
-	set_property IOSTANDARD LVCMOS33 [get_ports PS2_CLK]
-	set_property PULLUP true [get_ports PS2_CLK]
-set_property PACKAGE_PIN B17 [get_ports PS2_DATA]					
-	set_property IOSTANDARD LVCMOS33 [get_ports PS2_DATA]	
-	set_property PULLUP true [get_ports PS2_DATA]
+# set_property PACKAGE_PIN C17 [get_ports PS2_CLK]						
+# 	set_property IOSTANDARD LVCMOS33 [get_ports PS2_CLK]
+# 	set_property PULLUP true [get_ports PS2_CLK]
+# set_property PACKAGE_PIN B17 [get_ports PS2_DATA]					
+# 	set_property IOSTANDARD LVCMOS33 [get_ports PS2_DATA]	
+# 	set_property PULLUP true [get_ports PS2_DATA]
 
 
 ##Quad SPI Flash
