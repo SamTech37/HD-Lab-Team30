@@ -1,8 +1,14 @@
-`define STOP  2'b00
-`define LEFT  2'b01
-`define RIGHT  2'b10
-`define FORWARD  2'b11
-`define cur_version  6'b2
+
+
+`define STOP  3'b000
+`define SHARP_LEFT  2'b001
+`define SHARP_RIGHT  3'b010
+`define LEFT  3'b011
+`define RIGHT  3'b100
+`define FORWARD  3'b101
+`define BACKWARD 3'b110
+`define CLOCK_REV 3'b111
+`define cur_version  6'd6 //LED to make sure newer iterations are actually programmed to the board
 
 //[TODO]
 //LED debug for motor mode(direction)
@@ -23,7 +29,8 @@ module CarTop(
     output wire [5:0]version
 );
     
-    wire [1:0] state;
+
+    wire [2:0] state;
     wire reset, rst_db, stop;
     debounce d0(.pb_debounced(rst_db), .pb(rst), .clk(clk));
     onepulse d1(.PB_debounced(rst_db), .clk(clk), .PB_one_pulse(reset));
@@ -52,15 +59,16 @@ module CarTop(
         .mid_signal(mid_signal), 
         .state(state)
        );
-    // [DONE] Use left and right to set your motor's spinning direction
+       
+    // control motor direction (i.e. forward/backward spinning)
     always @(*) begin
         
         if(stop) {left, right} = 4'b0000; //stop
         else begin //go forward
-            left[1] = 1'b1;
-            left[0] = 1'b0;
-            right[1] = 1'b1;
-            right[0] = 1'b0;
+            if(state == `BACKWARD) {left,right} = 4'b0101;
+            else {left,right} = 4'b1010; //turning and whatnot should go forward
+            
+            //rotation
         end
     end
 

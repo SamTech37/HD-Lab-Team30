@@ -1,13 +1,17 @@
 
-//to be adjusted
-parameter MaxDuty = 10'd800;
-parameter TurnSpeed = 10'd700;
+//speed of the main wheel
+parameter FAST = 10'd1000;
+parameter MID = 10'd800;
+// parameter SLOW = 10'd600;
+//the speed difference for turning
+parameter TURN = 10'd200;
+parameter SHARP_TURN = 10'd300;
 `include "car_top.v"
 
 module motor(
     input clk,
     input rst,
-    input [1:0]mode,
+    input [2:0]mode,
     output  [1:0]pwm
 );
 
@@ -28,8 +32,7 @@ module motor(
         end
     end
     
-    // [Done] take the right speed for different situation
-
+    // control motor speed
     always @(*) begin
         case(mode)
             `STOP:
@@ -39,19 +42,34 @@ module motor(
                 end
             `LEFT:
                 begin
-                    next_left_motor = TurnSpeed;
-                    next_right_motor = MaxDuty;
+                    next_left_motor = MID - TURN;
+                    next_right_motor = MID;
                 end
             `RIGHT:
                 begin
-                    next_left_motor = MaxDuty;
-                    next_right_motor = TurnSpeed;
+                    next_left_motor = MID;
+                    next_right_motor = MID-TURN;
                 end
-            `FORWARD:
+            `SHARP_LEFT:
                 begin
-                    next_left_motor = MaxDuty;
-                    next_right_motor = MaxDuty;
+                    next_left_motor = MID - SHARP_TURN;
+                    next_right_motor =   MID ;
                 end
+            `SHARP_RIGHT:
+                begin
+                    next_left_motor = MID;
+                    next_right_motor = MID - SHARP_TURN;
+                end
+            `BACKWARD,`FORWARD:
+                begin
+                    next_left_motor = FAST;
+                    next_right_motor = FAST;
+                end
+            
+            default: begin //same as front/back straight
+                next_left_motor = FAST;
+                next_right_motor = FAST;
+            end
         endcase
     end
 

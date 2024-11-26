@@ -5,19 +5,21 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     input clk;
     input reset;
     input left_signal, right_signal, mid_signal; //low when detected blackline, else high
-    output reg [1:0] state;
+    output reg [2:0] state;
 
     wire left, right, mid;
     //detect black line
 //    assign left = ~left_signal;
 //    assign right = ~right_signal;
 //    assign mid = ~mid_signal;
+
+
     //detect white line
     assign left = left_signal;
     assign right = right_signal;
     assign mid = mid_signal;
 
-    reg [1:0] next_state;
+    reg [2:0] next_state;
     
 
     // [Done] Receive three signals and make your own policy.
@@ -31,18 +33,24 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
         end
     end
 
-    //naive control policy
-    //maybe add sharp turn left & sharp turn right later
+    //better control policy
+    
     always @(*) begin
-//    //test motor first
-//    next_state = `FORWARD;
-        if(left && !right && !mid) begin
+        if(left && !right && mid) begin
             next_state = `LEFT;
-        end else if(!left && right && !mid) begin
+        end else if(!left && right && mid) begin
             next_state = `RIGHT;
+        end else if(left && !right && !mid) begin
+            next_state = `SHARP_LEFT;
+        end else if(!left && right && !mid) begin
+            next_state = `SHARP_RIGHT;
+        end else if(!left && !right && !mid) begin
+            next_state = `BACKWARD;
         end else begin
             next_state = `FORWARD;
         end
+        
+
     end
 
     
