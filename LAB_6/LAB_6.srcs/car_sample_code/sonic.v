@@ -12,7 +12,7 @@ module sonic_top(clk, rst, Echo, Trig, stop);
 	PosCounter u2(.clk(clk1M), .rst(rst), .echo(Echo), .distance_count(dis));
 
     // [Done] calculate the right distance to trig stop(triggered when the distance is lower than 40 cm)
-    parameter StopDistance = 20'd4000; //4000 * 0.1 mm = 40cm
+    parameter StopDistance = 20'd4500; //4000 * 0.1 mm = 40cm, add a buffer distance (500) to brake
     assign stop = (dis <= StopDistance) ? 1'b1 : 1'b0;
  
 endmodule

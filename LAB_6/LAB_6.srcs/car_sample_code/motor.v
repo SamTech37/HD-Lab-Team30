@@ -1,6 +1,7 @@
 
-parameter MaxDuty = 10'd400;
-parameter TurnSpeed = 10'd100;
+//to be adjusted
+parameter MaxDuty = 10'd800;
+parameter TurnSpeed = 10'd700;
 `include "car_top.v"
 
 module motor(
