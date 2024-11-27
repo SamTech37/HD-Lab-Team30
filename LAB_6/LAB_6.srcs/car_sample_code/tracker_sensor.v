@@ -18,7 +18,7 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     reg [2:0] last_state; 
     reg [2:0] next_last_state; 
     //if the three signals are all zero, 
-    //the car can use it to judge whether turning right or left
+    //the car will judge whether turning right or left by the previous turn made
 
     // [Done] Receive three signals and make your own policy.
     // Hint: You can use output state to change your action.

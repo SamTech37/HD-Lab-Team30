@@ -4,8 +4,8 @@ parameter FAST = 10'd1000;
 parameter MID = 10'd800;
 // parameter SLOW = 10'd600;
 //the speed difference for turning
-parameter TURN = 10'd400;
-parameter SHARP_TURN = 10'd400;
+parameter TURN = 10'd200;
+parameter SHARP_TURN = 10'd300;
 `include "car_top.v"
 
 module motor(
@@ -50,15 +50,15 @@ module motor(
                     next_left_motor = FAST;
                     next_right_motor = FAST - TURN;
                 end
-            `SHARP_LEFT:
+            `SHARP_LEFT: //revolution
                 begin
-                    next_left_motor = FAST - SHARP_TURN;
-                    next_right_motor = FAST;
+                    next_left_motor = MID;
+                    next_right_motor = MID;
                 end
             `SHARP_RIGHT:
                 begin
-                    next_left_motor = FAST;
-                    next_right_motor = FAST - SHARP_TURN;
+                    next_left_motor = MID;
+                    next_right_motor = MID;
                 end
             `TRANSITION:
                 begin
@@ -71,10 +71,6 @@ module motor(
                     next_right_motor = FAST;
                 end
             
-            default: begin //same as front/back straight
-                next_left_motor = FAST;
-                next_right_motor = FAST;
-            end
         endcase
     end
 

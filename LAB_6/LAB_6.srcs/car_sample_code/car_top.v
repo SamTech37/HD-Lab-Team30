@@ -1,18 +1,16 @@
 
 
 `define STOP  3'b000
-`define SHARP_LEFT  2'b001
+`define SHARP_LEFT  3'b001
 `define SHARP_RIGHT  3'b010
 `define LEFT  3'b011
 `define RIGHT  3'b100
 `define FORWARD  3'b101
 `define BACKWARD 3'b110
 `define TRANSITION 3'b111
-`define cur_version  6'd13 //LED to make sure newer iterations are actually programmed to the board
+`define cur_version  6'd14 //LED to make sure newer iterations are actually programmed to the board
 
-//[TODO]
-//LED debug for motor mode(direction)
-//charge the battery
+
 
 module CarTop(
     input clk,
@@ -67,11 +65,21 @@ module CarTop(
     // control motor direction (i.e. forward/backward spinning)
     always @(*) begin
         
-        if(stop) {left, right} = 4'b0000; //stop
-        else begin //go forward
-            if(state == `BACKWARD) {left,right} = 4'b0101;
-            else {left,right} = 4'b1010; //turning and whatnot should go forward
-            
+        if(stop) {left, right} = 4'b0000; //stop has highest priority
+        else begin 
+            case(state)
+            `FORWARD, `LEFT, `RIGHT:
+                {left,right} = 4'b1010;
+            `SHARP_LEFT:
+                {left,right} = 4'b0110;
+            `SHARP_RIGHT:
+                {left,right} = 4'b1001;
+            `BACKWARD:
+                {left,right} = 4'b0101;
+            `TRANSITION, `STOP:
+                {left,right} = 4'b1111;
+
+            endcase
 
         end
         
