@@ -8,7 +8,6 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
     output reg [2:0] state;
 
     wire left, right, mid;
-    reg have_transition;
     //detect white line
     assign left = left_signal;
     assign right = right_signal;
@@ -50,22 +49,12 @@ module tracker_sensor(clk, reset, left_signal, right_signal, mid_signal, state);
         end else if(!left && right && !mid) begin
             next_state = `SHARP_RIGHT;
             next_last_state = last_state;
-        end else if(!left && !right && !mid && !have_transition) begin
-            //
+        end else if(!left && !right && !mid) begin
             next_last_state = last_state;
-            next_state = `TRANSITION;
-            have_transition = 1'b1;
-            //next_state = `BACKWARD;
-        end else if(!left && !right && !mid && have_transition) begin
-            //
-            next_last_state = last_state;
-            have_transition = 1'b1;
             if(last_state == `LEFT) next_state = `SHARP_LEFT;
             else if(last_state == `RIGHT) next_state = `SHARP_RIGHT;
-            else next_state = `BACKWARD;
             //next_state = `BACKWARD;
         end else begin
-            have_transition = 1'b0;
             next_last_state = `FORWARD;
             next_state = `FORWARD;
         end

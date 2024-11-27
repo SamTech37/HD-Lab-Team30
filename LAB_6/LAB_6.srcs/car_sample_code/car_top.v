@@ -8,7 +8,7 @@
 `define FORWARD  3'b101
 `define BACKWARD 3'b110
 `define TRANSITION 3'b111
-`define cur_version  6'd14 //LED to make sure newer iterations are actually programmed to the board
+`define cur_version  6'd16 //LED to make sure newer iterations are actually programmed to the board
 
 
 
@@ -19,6 +19,8 @@ module CarTop(
     input left_signal, //from tracker sensor
     input right_signal,
     input mid_signal,
+    input sonic_en, // to turn on/off the sonic
+    input tracker_en,
     output trig, //to sonic sensor
     output left_motor, //pwm for left motor
     output reg [1:0]left,//spin direction for left motor, = {IN1, IN2}
@@ -65,21 +67,24 @@ module CarTop(
     // control motor direction (i.e. forward/backward spinning)
     always @(*) begin
         
-        if(stop) {left, right} = 4'b0000; //stop has highest priority
+        if(stop && sonic_en) {left, right} = 4'b1111; //stop has highest priority
         else begin 
-            case(state)
-            `FORWARD, `LEFT, `RIGHT:
-                {left,right} = 4'b1010;
-            `SHARP_LEFT:
-                {left,right} = 4'b0110;
-            `SHARP_RIGHT:
-                {left,right} = 4'b1001;
-            `BACKWARD:
-                {left,right} = 4'b0101;
-            `TRANSITION, `STOP:
-                {left,right} = 4'b1111;
+            if(!tracker_en) {left,right}=4'b1010; //forward
+            else begin
+                case(state)
+                `FORWARD, `LEFT, `RIGHT:
+                    {left,right} = 4'b1010;
+                `SHARP_LEFT:
+                    {left,right} = 4'b0110;
+                `SHARP_RIGHT:
+                    {left,right} = 4'b1001;
+                `BACKWARD:
+                    {left,right} = 4'b0101;
+                `TRANSITION, `STOP:
+                    {left,right} = 4'b1111;
 
-            endcase
+                endcase
+            end
 
         end
         

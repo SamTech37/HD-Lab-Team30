@@ -52,13 +52,13 @@ module motor(
                 end
             `SHARP_LEFT: //revolution
                 begin
-                    next_left_motor = MID;
-                    next_right_motor = MID;
+                    next_left_motor = FAST;
+                    next_right_motor = FAST;
                 end
             `SHARP_RIGHT:
                 begin
-                    next_left_motor = MID;
-                    next_right_motor = MID;
+                    next_left_motor = FAST;
+                    next_right_motor = FAST;
                 end
             `TRANSITION:
                 begin
