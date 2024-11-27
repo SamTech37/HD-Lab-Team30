@@ -7,8 +7,8 @@
 `define RIGHT  3'b100
 `define FORWARD  3'b101
 `define BACKWARD 3'b110
-`define CLOCK_REV 3'b111
-`define cur_version  6'd6 //LED to make sure newer iterations are actually programmed to the board
+`define TRANSITION 3'b111
+`define cur_version  6'd13 //LED to make sure newer iterations are actually programmed to the board
 
 //[TODO]
 //LED debug for motor mode(direction)
@@ -26,7 +26,9 @@ module CarTop(
     output reg [1:0]left,//spin direction for left motor, = {IN1, IN2}
     output right_motor,
     output reg [1:0]right,// {IN3,IN4}
-    output wire [5:0]version
+    output wire [5:0] version,
+    output wire [1:0]left_LED,
+    output wire [1:0]right_LED
 );
     
 
@@ -35,6 +37,8 @@ module CarTop(
     debounce d0(.pb_debounced(rst_db), .pb(rst), .clk(clk));
     onepulse d1(.PB_debounced(rst_db), .clk(clk), .PB_one_pulse(reset));
     assign version = `cur_version;
+    assign left_LED = left;
+    assign right_LED = right;
 
     motor A(
         .clk(clk),
@@ -68,8 +72,12 @@ module CarTop(
             if(state == `BACKWARD) {left,right} = 4'b0101;
             else {left,right} = 4'b1010; //turning and whatnot should go forward
             
-            //rotation
+
         end
+        
+        // if({left, right} == 4'b1111) begin
+        //     {left, right} = 4'b1010;
+        // end
     end
 
 
