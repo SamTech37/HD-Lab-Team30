@@ -1,9 +1,11 @@
-module sonic_top(clk, rst, Echo, Trig, stop);
+module sonic_top(clk, rst, Echo, Trig, stop, distance);
 	input clk, rst, Echo;
 	output Trig, stop;
+    output [19:0] distance; //for 7 segments display
 
+    wire [19:0] distance;
 	wire[19:0] dis; //20-bit distance, unit = 0.1mm
-	wire[19:0] d;
+	wire[19:0] d; //why there si a d??
     wire clk1M;
 	wire clk_2_17;
 
@@ -12,9 +14,9 @@ module sonic_top(clk, rst, Echo, Trig, stop);
 	PosCounter u2(.clk(clk1M), .rst(rst), .echo(Echo), .distance_count(dis));
 
     // [Done] calculate the right distance to trig stop(triggered when the distance is lower than 40 cm)
-    parameter StopDistance = 20'd4500; //4000 * 0.1 mm = 40cm, add a buffer distance (500) to brake
+    parameter StopDistance = 20'd5650; //4000 * 0.1 mm = 40cm, add a buffer distance (2000) to brake
     assign stop = (dis <= StopDistance) ? 1'b1 : 1'b0;
- 
+    assign distance = dis / 20'd100;
 endmodule
 
 module PosCounter(clk, rst, echo, distance_count); 

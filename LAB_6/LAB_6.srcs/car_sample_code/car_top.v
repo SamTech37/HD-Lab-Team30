@@ -8,7 +8,7 @@
 `define FORWARD  3'b101
 `define BACKWARD 3'b110
 `define TRANSITION 3'b111
-`define cur_version  6'd16 //LED to make sure newer iterations are actually programmed to the board
+`define cur_version  6'd21 //LED to make sure newer iterations are actually programmed to the board
 
 
 
@@ -28,12 +28,15 @@ module CarTop(
     output reg [1:0]right,// {IN3,IN4}
     output wire [5:0] version,
     output wire [1:0]left_LED,
-    output wire [1:0]right_LED
+    output wire [1:0]right_LED,
+    output wire [6:0] display,
+    output wire [3:0] digit
 );
     
 
     wire [2:0] state;
     wire reset, rst_db, stop;
+    wire [19:0] distance;
     debounce d0(.pb_debounced(rst_db), .pb(rst), .clk(clk));
     onepulse d1(.PB_debounced(rst_db), .clk(clk), .PB_one_pulse(reset));
     assign version = `cur_version;
@@ -52,7 +55,8 @@ module CarTop(
         .rst(reset), 
         .Echo(echo), 
         .Trig(trig),
-        .stop(stop)
+        .stop(stop),
+        .distance(distance)
     );
     
     tracker_sensor C(
@@ -64,6 +68,13 @@ module CarTop(
         .state(state)
        );
        
+   car_SevenSegment SS(
+        .display(display),
+        .digit(digit),//the rightmost 3 digits
+        .distance(distance),
+        .rst(rst), //active high
+        .clk(clk)
+    );
     // control motor direction (i.e. forward/backward spinning)
     always @(*) begin
         

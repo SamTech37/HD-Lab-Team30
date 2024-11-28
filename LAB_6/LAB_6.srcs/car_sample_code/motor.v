@@ -1,10 +1,10 @@
 
 //speed of the main wheel
-parameter FAST = 10'd1000;
+parameter FAST = 10'd1023;
 parameter MID = 10'd800;
 // parameter SLOW = 10'd600;
 //the speed difference for turning
-parameter TURN = 10'd200;
+parameter TURN = 10'd150;
 parameter SHARP_TURN = 10'd300;
 `include "car_top.v"
 
