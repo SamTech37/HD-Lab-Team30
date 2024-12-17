@@ -89,24 +89,26 @@ module XADCdemo(
     //led visual dmm              
     always @(posedge(CLK100MHZ)) begin            
         if(ready == 1'b1) begin
-            case (data[15:12])
-            1:  led <= 16'b11;
-            2:  led <= 16'b111;
-            3:  led <= 16'b1111;
-            4:  led <= 16'b11111;
-            5:  led <= 16'b111111;
-            6:  led <= 16'b1111111; 
-            7:  led <= 16'b11111111;
-            8:  led <= 16'b111111111;
-            9:  led <= 16'b1111111111;
-            10: led <= 16'b11111111111;
-            11: led <= 16'b111111111111;
-            12: led <= 16'b1111111111111;
-            13: led <= 16'b11111111111111;
-            14: led <= 16'b111111111111111;
-            15: led <= 16'b1111111111111111;                        
-            default: led <= 16'b1; 
-            endcase
+            led <= data; 
+            //it seems the the leftmost 10 bits (led[15:6]) are our desired voltage read
+//            case (data[15:12])
+//            1:  led <= 16'b11;
+//            2:  led <= 16'b111;
+//            3:  led <= 16'b1111;
+//            4:  led <= 16'b11111;
+//            5:  led <= 16'b111111;
+//            6:  led <= 16'b1111111; 
+//            7:  led <= 16'b11111111;
+//            8:  led <= 16'b111111111;
+//            9:  led <= 16'b1111111111;
+//            10: led <= 16'b11111111111;
+//            11: led <= 16'b111111111111;
+//            12: led <= 16'b1111111111111;
+//            13: led <= 16'b11111111111111;
+//            14: led <= 16'b111111111111111;
+//            15: led <= 16'b1111111111111111;                        
+//            default: led <= 16'b1; 
+//            endcase
         end
     end
     
