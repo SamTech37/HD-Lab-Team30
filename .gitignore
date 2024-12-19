@@ -7,3 +7,10 @@ LAB_1/LAB_1.sim
 **/*.cache/
 **/*.sim/
 **/*.runs/
+
+#ignore all jou and log files
+**/*.jou
+**/*.log
+
+
+

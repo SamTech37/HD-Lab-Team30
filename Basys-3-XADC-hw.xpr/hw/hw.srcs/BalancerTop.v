@@ -42,7 +42,7 @@ module BalancerTop(
     );
     
     reg x_inout_dir, y_inout_dir;//0: input, 1: output
-    
+    wire slow_clk; // 10MHz clock in case the calculation needs more time
     
     assign an = 4'b0000;
     assign seg = 7'b000_1111;
