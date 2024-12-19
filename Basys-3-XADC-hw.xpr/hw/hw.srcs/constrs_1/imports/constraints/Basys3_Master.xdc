@@ -3,6 +3,10 @@
 ## - uncomment the lines corresponding to used pins
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
+
+## the constraint for the demo code from Digilent
+## modify this to fit our project
+
 # Clock signal
 set_property PACKAGE_PIN W5 [get_ports CLK100MHZ]
 set_property IOSTANDARD LVCMOS33 [get_ports CLK100MHZ]
@@ -160,8 +164,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports {an[3]}]
 #set_property PACKAGE_PIN B15 [get_ports {JB[2]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JB[2]}]
 ##Sch name = JB4
-#set_property PACKAGE_PIN B16 [get_ports {JB[3]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JB[3]}]
+set_property PACKAGE_PIN B16 [get_ports {motorPWM_x}]
+set_property IOSTANDARD LVCMOS33 [get_ports {motorPWM_x}]
 ##Sch name = JB7
 #set_property PACKAGE_PIN A15 [get_ports {JB[4]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JB[4]}]
@@ -172,8 +176,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports {an[3]}]
 #set_property PACKAGE_PIN C15 [get_ports {JB[6]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JB[6]}]
 ##Sch name = JB10
-#set_property PACKAGE_PIN C16 [get_ports {JB[7]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JB[7]}]
+set_property PACKAGE_PIN C16 [get_ports {motorPWM_y}]
+set_property IOSTANDARD LVCMOS33 [get_ports {motorPWM_y}]
 
 
 

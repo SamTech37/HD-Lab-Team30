@@ -5,18 +5,12 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 02/12/2015 03:26:51 PM
-// Design Name: 
-// Module Name: // Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
+
 // 
 // Revision:
-// Revision 0.01 - File Created
-// Revision 0.02 - Fixed timing slack (ArtVVB 06/01/17)
+// Revision 0.01 - tested this template
+// Revision 0.02 - testing XADC input
+// Revision 0.03 - testing servomotor control
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -34,19 +28,24 @@ module XADCdemo(
     input vauxn14,
     input vp_in,
     input vn_in,
-    input [1:0] sw,
-    output reg [15:0] led,
+    input  [1:0] sw,
+    output [15:0] led,
     output [3:0] an,
     output dp,
-    output [6:0] seg
+    output [6:0] seg,
+
+    output wire motorPWM_x, //for servomotor rotation angle control
+    output wire motorPWM_y
 );
+
+    wire slow_clock; //maybe use 100ns clock cycle in case some calculations takes longer
 
     wire enable;  
     wire ready;
     wire [15:0] data;   
     reg [6:0] Address_in;
 	
-	//secen segment controller signals
+	//seven segment controller signals
     reg [32:0] count;
     localparam S_IDLE = 0;
     localparam S_FRAME_WAIT = 1;
@@ -60,7 +59,26 @@ module XADCdemo(
     wire [15:0] b2d_dout;
     wire b2d_done;
 
-    //xadc instantiation connect the eoc_out .den_in to get continuous conversion
+    // x,y voltage input (use this directly as coordinates?)
+    reg[10-1:0] x_voltage, y_voltage;
+    assign led = x_voltage;
+
+    //servomotor control signals
+    reg [10-1:0] motor_duty; // ratio = duty/1000
+    
+    // +1 to duty = +2 deg rotation
+
+    localparam DEG_0 = 10'd25;
+    localparam DEG_30 = 10'd41;
+    localparam DEG_60 = 10'd58;//default position
+    localparam DEG_90 = 10'd75;
+    localparam DEG_120 = 10'd92;
+    localparam DEG_150 = 10'd109;
+    localparam DEG_180 = 10'd125;
+
+
+    //xadc instantiation 
+    // connect the eoc_out .den_in to get continuous conversion
     xadc_wiz_0  XLXI_7 (
         .daddr_in(Address_in), //addresses can be found in the artix 7 XADC user guide DRP register space
         .dclk_in(CLK100MHZ), 
@@ -76,9 +94,9 @@ module XADCdemo(
         .vauxn14(vauxn14),
         .vauxp15(vauxp15),
         .vauxn15(vauxn15),
-        .vn_in(vn_in), 
-        .vp_in(vp_in), 
-        .alarm_out(), 
+        // .vn_in(vn_in), 
+        // .vp_in(vp_in), 
+        // .alarm_out(), 
         .do_out(data), 
         //.reset_in(),
         .eoc_out(enable),
@@ -89,28 +107,40 @@ module XADCdemo(
     //led visual dmm              
     always @(posedge(CLK100MHZ)) begin            
         if(ready == 1'b1) begin
-            led <= data; 
-            //it seems the the leftmost 10 bits (led[15:6]) are our desired voltage read
-//            case (data[15:12])
-//            1:  led <= 16'b11;
-//            2:  led <= 16'b111;
-//            3:  led <= 16'b1111;
-//            4:  led <= 16'b11111;
-//            5:  led <= 16'b111111;
-//            6:  led <= 16'b1111111; 
-//            7:  led <= 16'b11111111;
-//            8:  led <= 16'b111111111;
-//            9:  led <= 16'b1111111111;
-//            10: led <= 16'b11111111111;
-//            11: led <= 16'b111111111111;
-//            12: led <= 16'b1111111111111;
-//            13: led <= 16'b11111111111111;
-//            14: led <= 16'b111111111111111;
-//            15: led <= 16'b1111111111111111;                        
-//            default: led <= 16'b1; 
-//            endcase
+            x_voltage <= data[15:6]; 
+            //it seems the the leftmost 10 bits  are our desired voltage read
+        end else begin
+            x_voltage <= x_voltage;
         end
     end
+
+
+    //output to actualizer (servomotor)
+    always @(posedge CLK100MHZ) begin
+        //on the left
+        //remember to consider the base noise
+        // the range should be something like [0.1,0.5]V
+        // when lower than 0.1 means nothing is on touchscreen
+        if (10'd15 <= x_voltage && x_voltage <= 10'd150) begin
+            motor_duty <= DEG_30;
+        end else if (10'd450 < x_voltage  ) begin //on the right
+            motor_duty <= DEG_90;
+        end else begin
+            motor_duty <= DEG_60; 
+        end
+    end
+    ServomotorPWM pwm_x (
+        .clk(CLK100MHZ),
+        .reset(),
+        .duty(motor_duty),
+        .PWM(motorPWM_x)
+    );
+    // ServomotorPWM pwm_y (
+    //     .clk(CLK100MHZ),
+    //     .reset(),
+    //     .duty(motor_duty),
+    //     .PWM(motorPWM_y)
+    // );
     
     //binary to decimal conversion
     always @ (posedge(CLK100MHZ)) begin
