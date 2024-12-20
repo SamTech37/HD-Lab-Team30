@@ -40,6 +40,7 @@ module XADCdemo(
 
     wire slow_clock; //maybe use 100ns clock cycle in case some calculations takes longer
 
+    //XADC signals
     wire enable;  
     wire ready;
     wire [15:0] data;   
@@ -60,14 +61,14 @@ module XADCdemo(
     wire b2d_done;
 
     // x,y voltage input (use this directly as coordinates?)
-    reg[10-1:0] x_voltage, y_voltage;
+    // converted to 10-bit from JXA port analog input
+    reg [10-1:0] x_voltage, y_voltage;
     assign led = x_voltage;
 
     //servomotor control signals
     reg [10-1:0] motor_duty; // ratio = duty/1000
     
     // +1 to duty = +2 deg rotation
-
     localparam DEG_0 = 10'd25;
     localparam DEG_30 = 10'd41;
     localparam DEG_60 = 10'd58;//default position
@@ -76,6 +77,8 @@ module XADCdemo(
     localparam DEG_150 = 10'd109;
     localparam DEG_180 = 10'd125;
 
+
+    /* main circuit */
 
     //xadc instantiation 
     // connect the eoc_out .den_in to get continuous conversion
@@ -103,6 +106,15 @@ module XADCdemo(
         .channel_out(),
         .drdy_out(ready)
     );
+    
+    always @(posedge(CLK100MHZ)) begin
+        case(sw)
+        0: Address_in <= 8'h16; // XA1/AD6
+        1: Address_in <= 8'h1e; // XA2/AD14
+        2: Address_in <= 8'h17; // XA3/AD7
+        3: Address_in <= 8'h1f; // XA4/AD15
+        endcase
+    end
     
     //led visual dmm              
     always @(posedge(CLK100MHZ)) begin            
@@ -142,6 +154,8 @@ module XADCdemo(
     //     .PWM(motorPWM_y)
     // );
     
+
+    /* debug tools */
     //binary to decimal conversion
     always @ (posedge(CLK100MHZ)) begin
         case (state)
@@ -180,14 +194,7 @@ module XADCdemo(
         .dout(b2d_dout)
     );
       
-    always @(posedge(CLK100MHZ)) begin
-        case(sw)
-        0: Address_in <= 8'h16; // XA1/AD6
-        1: Address_in <= 8'h1e; // XA2/AD14
-        2: Address_in <= 8'h17; // XA3/AD7
-        3: Address_in <= 8'h1f; // XA4/AD15
-        endcase
-    end
+
     
     DigitToSeg segment1(
         .in1(sseg_data[3:0]),

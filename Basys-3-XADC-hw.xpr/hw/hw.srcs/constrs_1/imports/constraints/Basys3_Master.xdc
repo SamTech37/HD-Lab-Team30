@@ -4,8 +4,9 @@
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 
-## the constraint for the demo code from Digilent
-## modify this to fit our project
+## the constraint from the XADC demo code
+# Constraint for 1D (x-axis) ball balancer FPGA
+
 
 # Clock signal
 set_property PACKAGE_PIN W5 [get_ports CLK100MHZ]
