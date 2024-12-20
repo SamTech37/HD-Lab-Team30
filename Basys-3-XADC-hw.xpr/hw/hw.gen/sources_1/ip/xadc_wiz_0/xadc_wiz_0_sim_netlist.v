@@ -1,9 +1,10 @@
-// Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+// Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
-// Tool Version: Vivado v.2020.1 (win64) Build 2902540 Wed May 27 19:54:49 MDT 2020
-// Date        : Thu Aug 25 14:59:28 2022
-// Host        : sim-ro running 64-bit major release  (build 9200)
-// Command     : write_verilog -force -mode funcsim d:/WorkBORI/Basys-3/hw/src/ip/xadc_wiz_0/xadc_wiz_0_sim_netlist.v
+// Tool Version: Vivado v.2022.2 (win64) Build 3671981 Fri Oct 14 05:00:03 MDT 2022
+// Date        : Fri Dec 20 20:15:13 2024
+// Host        : sam_acer2 running 64-bit major release  (build 9200)
+// Command     : write_verilog -force -mode funcsim
+//               d:/HD-Lab-Team30/Basys-3-XADC-hw.xpr/hw/hw.gen/sources_1/ip/xadc_wiz_0/xadc_wiz_0_sim_netlist.v
 // Design      : xadc_wiz_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -89,7 +90,7 @@ module xadc_wiz_0
 
   (* BOX_TYPE = "PRIMITIVE" *) 
   XADC #(
-    .INIT_40(16'h0000),
+    .INIT_40(16'h1000),
     .INIT_41(16'h21AF),
     .INIT_42(16'h0400),
     .INIT_43(16'h0000),
