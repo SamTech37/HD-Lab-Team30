@@ -16,8 +16,9 @@
 //////////////////////////////////////////////////////////////////////////////////
  
 
-module XADCdemo(
+module BallBalancer1D(
     input CLK100MHZ,
+    // JXA port analog input
     input vauxp6,
     input vauxn6,
     input vauxp7,
@@ -26,14 +27,20 @@ module XADCdemo(
     input vauxn15,
     input vauxp14,
     input vauxn14,
-    input vp_in,
-    input vn_in,
+    input vp_in, // input for single channel XADC
+    input vn_in, // (not used)
     input  [1:0] sw,
     output [15:0] led,
     output [3:0] an,
     output dp,
     output [6:0] seg,
-
+    // touchscreen drivers
+    // inouts?
+    // input wire x_pos_driver, //ground
+    // inout wire x_neg_driver, //power source for x-direction / input from y-direction
+    // input wire y_pos_driver, //ground
+    // inout wire y_neg_driver, //power source for  / input from touchscreen
+    
     output wire motorPWM_x, //for servomotor rotation angle control
     output wire motorPWM_y
 );
@@ -51,7 +58,7 @@ module XADCdemo(
     localparam S_IDLE = 0;
     localparam S_FRAME_WAIT = 1;
     localparam S_CONVERSION = 2;
-    reg [1:0] state = S_IDLE;
+    reg [1:0] b2d_state = S_IDLE;
     reg [15:0] sseg_data;
 	
 	//binary to decimal converter signals
@@ -65,8 +72,16 @@ module XADCdemo(
     reg [10-1:0] x_voltage, y_voltage;
     assign led = x_voltage;
 
+    //handle inouts
+    reg [1:0] touchscreen_state;
+    localparam TOUCH_IDLE = 2'b00;
+    localparam TOUCH_X = 2'b01;
+    localparam TOUCH_Y = 2'b10;
+    assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
+    assign y_neg_driver = (touchscreen_state == TOUCH_Y) ? 1'b1 : 1'bz;
+
     //servomotor control signals
-    reg [10-1:0] motor_duty; // ratio = duty/1000
+    reg [10-1:0] motor_duty; // ratio = duty/1024
     
     // +1 to duty = +2 deg rotation
     localparam DEG_0 = 10'd25;
@@ -78,7 +93,9 @@ module XADCdemo(
     localparam DEG_180 = 10'd125;
 
 
-    /* main circuit */
+    /* 
+    // main circuit 
+    */
 
     //xadc instantiation 
     // connect the eoc_out .den_in to get continuous conversion
@@ -127,6 +144,8 @@ module XADCdemo(
     end
 
 
+    //PID controller
+
     //output to actualizer (servomotor)
     always @(posedge CLK100MHZ) begin
         //on the left
@@ -158,20 +177,20 @@ module XADCdemo(
     /* debug tools */
     //binary to decimal conversion
     always @ (posedge(CLK100MHZ)) begin
-        case (state)
+        case (b2d_state)
         S_IDLE: begin
-            state <= S_FRAME_WAIT;
+            b2d_state <= S_FRAME_WAIT;
             count <= 'b0;
         end
         S_FRAME_WAIT: begin
             if (count >= 10000000) begin
                 if (data > 16'hFFD0) begin
                     sseg_data <= 16'h1000;
-                    state <= S_IDLE;
+                    b2d_state <= S_IDLE;
                 end else begin
                     b2d_start <= 1'b1;
                     b2d_din <= data;
-                    state <= S_CONVERSION;
+                    b2d_state <= S_CONVERSION;
                 end
             end else
                 count <= count + 1'b1;
@@ -180,7 +199,7 @@ module XADCdemo(
             b2d_start <= 1'b0;
             if (b2d_done == 1'b1) begin
                 sseg_data <= b2d_dout;
-                state <= S_IDLE;
+                b2d_state <= S_IDLE;
             end
         end
         endcase

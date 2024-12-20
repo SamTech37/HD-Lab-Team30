@@ -30,7 +30,7 @@ module PWM_gen (
 );
     wire [31:0] count_max = 32'd100_000_000 / freq;
     wire [31:0] count_duty = count_max * duty / 32'd1024; 
-    //duty / 1024 = duty cycle, max 40%
+    //duty / 1024 = duty cycle
     reg [31:0] count;
         
     always @(posedge clk, posedge reset) begin

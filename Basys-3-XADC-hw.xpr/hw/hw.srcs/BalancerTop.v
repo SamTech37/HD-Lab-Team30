@@ -20,9 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-//TODO: add LED indicator for version, to ensure it's correctly programmed  
-//TODO: figure out how to use input and XADC IP
-module BalancerTop(
+//[DONE] figure out how to use input and XADC IP: use the template code
+module Balancer2DTop(
     input wire clk, //input clock
     input wire rst_btn, //input reset
     input wire [6-1:0] sw,
