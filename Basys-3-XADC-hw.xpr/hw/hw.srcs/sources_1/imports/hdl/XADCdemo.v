@@ -19,7 +19,7 @@
 module BallBalancer1D(
     input CLK100MHZ,
     // JXA port analog input
-    input vauxp6,
+//    input vauxp6,
     input vauxn6,
     input vauxp7,
     input vauxn7,
@@ -37,9 +37,9 @@ module BallBalancer1D(
     // touchscreen drivers
     // inouts?
     // input wire x_pos_driver, //ground
-    // inout wire x_neg_driver, //power source for x-direction / input from y-direction
+     inout wire x_neg_driver, //power source for x-direction / input from y-direction
     // input wire y_pos_driver, //ground
-    // inout wire y_neg_driver, //power source for  / input from touchscreen
+    // inout wire y_neg_driver, //power source for y-direction  / input from x-direction
     
     output wire motorPWM_x, //for servomotor rotation angle control
     output wire motorPWM_y
@@ -73,12 +73,18 @@ module BallBalancer1D(
     assign led = x_voltage;
 
     //handle inouts
-    reg [1:0] touchscreen_state;
     localparam TOUCH_IDLE = 2'b00;
     localparam TOUCH_X = 2'b01;
     localparam TOUCH_Y = 2'b10;
+    reg [1:0] touchscreen_state = TOUCH_X;
+    reg [1:0] next_touchscreen_state;
+    
+    //output to x_neg inout
     assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
     assign y_neg_driver = (touchscreen_state == TOUCH_Y) ? 1'b1 : 1'bz;
+    
+    wire vauxp6;
+    assign vauxp6 = x_neg_driver;//input from x_neg inout
 
     //servomotor control signals
     reg [10-1:0] motor_duty; // ratio = duty/1024
@@ -148,17 +154,8 @@ module BallBalancer1D(
 
     //output to actualizer (servomotor)
     always @(posedge CLK100MHZ) begin
-        //on the left
-        //remember to consider the base noise
-        // the range should be something like [0.1,0.5]V
-        // when lower than 0.1 means nothing is on touchscreen
-        if (10'd15 <= x_voltage && x_voltage <= 10'd150) begin
-            motor_duty <= DEG_30;
-        end else if (10'd450 < x_voltage  ) begin //on the right
-            motor_duty <= DEG_90;
-        end else begin
-            motor_duty <= DEG_60; 
-        end
+        //test
+        motor_duty <= x_voltage;
     end
     ServomotorPWM pwm_x (
         .clk(CLK100MHZ),

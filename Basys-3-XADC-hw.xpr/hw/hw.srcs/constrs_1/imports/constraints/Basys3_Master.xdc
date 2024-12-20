@@ -211,7 +211,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports {motorPWM_y}]
 
 #Pmod Header JXADC
 #Sch name = XA1_P
-set_property IOSTANDARD LVCMOS33 [get_ports vauxp6]
+##also vauxp6
+set_property IOSTANDARD LVCMOS33 [get_ports x_neg_driver ] 
 #Sch name = XA2_P
 set_property IOSTANDARD LVCMOS33 [get_ports vauxp14]
 #Sch name = XA3_P
@@ -231,7 +232,7 @@ set_property PACKAGE_PIN M2 [get_ports vauxp7]
 set_property PACKAGE_PIN M1 [get_ports vauxn7]
 set_property PACKAGE_PIN L3 [get_ports vauxp14]
 set_property PACKAGE_PIN M3 [get_ports vauxn14]
-set_property PACKAGE_PIN J3 [get_ports vauxp6]
+set_property PACKAGE_PIN J3 [get_ports x_neg_driver]
 set_property PACKAGE_PIN K3 [get_ports vauxn6]
 set_property IOSTANDARD LVCMOS33 [get_ports vauxn15]
 
