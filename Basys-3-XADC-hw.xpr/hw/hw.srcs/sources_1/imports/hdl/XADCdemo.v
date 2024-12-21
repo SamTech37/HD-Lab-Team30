@@ -29,7 +29,7 @@ module BallBalancer1D(
     input vauxn14,
     input vp_in, // input for single channel XADC
     input vn_in, // (not used)
-    input  [1:0] sw,
+    input  [15:0] sw,
     output [15:0] led,
     output [3:0] an,
     output dp,
@@ -61,6 +61,9 @@ module BallBalancer1D(
     reg [1:0] b2d_state = S_IDLE;
     reg [15:0] sseg_data;
 	
+    wire showMode; //0 show voltage, 1 show pid content
+    assign showMode = sw[15];
+
 	//binary to decimal converter signals
     reg b2d_start;
     reg [15:0] b2d_din;
@@ -139,7 +142,7 @@ module BallBalancer1D(
     );
     
     always @(posedge(CLK100MHZ)) begin
-        case(sw)
+        case(sw[1:0])
         0: Address_in <= 8'h16; // XA1/AD6
         1: Address_in <= 8'h1e; // XA2/AD14
         2: Address_in <= 8'h17; // XA3/AD7
@@ -163,6 +166,7 @@ module BallBalancer1D(
     localparam KI_X = 16'h0;
     localparam KD_X = 16'h0;
     wire [8-1:0] pid_x_out;
+    wire [16-1:0] pid_x_gain;
     PID_Controller pid_x (
     .clk(CLK100MHZ),               
     .rst(),                
@@ -171,7 +175,8 @@ module BallBalancer1D(
     .kp(KP_X),   // Proportional gain
     .ki(KI_X),   // Integral gain
     .kd(KD_X),   // Derivative gain
-    .out(pid_x_out)    // Output rotation degree (0~120)
+    .out(pid_x_out),    // Output rotation degree (0~120)
+    .gain(pid_x_gain)
     );
 
     //output to actualizer (servomotor)
@@ -208,7 +213,7 @@ module BallBalancer1D(
                     b2d_state <= S_IDLE;
                 end else begin
                     b2d_start <= 1'b1;
-                    b2d_din <= data;
+                    b2d_din <= showMode ? pid_x_out : data;
                     b2d_state <= S_CONVERSION;
                 end
             end else

@@ -9,7 +9,7 @@ module PID_Controller (
     input wire signed [15:0] kp,   // Proportional gain
     input wire signed [15:0] ki,   // Integral gain
     input wire signed [15:0] kd,   // Derivative gain
-    output wire  signed [8-1:0] out,    // Output rotation degree (0~120)
+    output wire  [8-1:0] out,    // Output rotation degree (0~120)
     output wire signed [16-1:0] gain,
     output wire signed [32-1:0] temp // Temporary variable
 );
@@ -49,16 +49,13 @@ module PID_Controller (
 
             // Store current error as previous error for the next cycle
             prev_error <= error;
-
-            // Output rotation degree (0~180)
-            // linear interpolation
-            //temp <= (total_gain-MIN_GAIN) * (DEG_MAX-DEG_MIN) / (MAX_GAIN-MIN_GAIN) + DEG_MIN;
         end
     end
-    
-
-    assign out = temp[7:0] ;
+    // Output rotation degree (0~180)
+    // linear interpolation
+    // [MIN_GAIN, MAX_GAIN] -> [DEG_MIN, DEG_MAX]
     assign gain = total_gain[15:0];
     assign temp  = (gain-MIN_GAIN) * (DEG_MAX-DEG_MIN) / (MAX_GAIN - MIN_GAIN) + DEG_MIN;
+    assign out = temp[7:0] + 8'd60; //[-60, 60] -> [0, 120]
 
 endmodule
