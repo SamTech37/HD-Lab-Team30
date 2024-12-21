@@ -9,7 +9,7 @@ module PID_Controller (
     input wire signed [15:0] kp,   // Proportional gain
     input wire signed [15:0] ki,   // Integral gain
     input wire signed [15:0] kd,   // Derivative gain
-    output reg signed [7:0] out    // Output rotation degree (0~180)
+    output wire  [7:0] out    // Output rotation degree (0~120)
 );
 
     // Internal registers for calculation
@@ -18,6 +18,11 @@ module PID_Controller (
     reg signed [31:0] integral;    // Accumulated integral term (32-bit to prevent overflow)
     reg signed [15:0] derivative;  // Derivative term
     reg signed [31:0] total_gain;   // Total gain
+    reg signed [64-1:0] temp; // Temporary variable
+
+    localparam signed [32-1:0] MIN_GAIN = -(32'd10000);
+    localparam signed [32-1:0] MAX_GAIN = 32'd10000;
+    localparam [8-1:0] DEG_MIN = 8'd0, DEG_MAX = 8'd120;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -26,7 +31,7 @@ module PID_Controller (
             prev_error <= 0;
             integral <= 0;
             derivative <= 0;
-            out <= 0;
+            temp <= 0;
         end else begin
             // Calculate new error
             error <= sp - pv;
@@ -44,7 +49,11 @@ module PID_Controller (
             prev_error <= error;
 
             // Output rotation degree (0~180)
-            // logic
+            // linear interpolation
+            // temp <= (total_gain-MIN_GAIN) * (DEG_MAX-DEG_MIN) / (MAX_GAIN-MIN_GAIN) + DEG_MIN;
+            temp <= (total_gain-MIN_GAIN) * 8'd120 / (MAX_GAIN - MIN_GAIN);
         end
     end
+    assign out = temp[7:0];
+
 endmodule

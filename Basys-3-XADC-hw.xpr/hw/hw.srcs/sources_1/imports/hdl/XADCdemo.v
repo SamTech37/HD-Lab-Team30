@@ -78,6 +78,12 @@ module BallBalancer1D(
     localparam TOUCH_Y = 2'b10;
     reg [1:0] touchscreen_state = TOUCH_X;
     reg [1:0] next_touchscreen_state;
+
+    parameter [10-1:0] X_max = 10'd460, X_mid = 10'd230, X_min=10'd10;
+
+    //less than X    
+    //parameter [10-1:0] Y_max = 10'd460, Y_mid = 10'd230, Y_min;
+
     
     //output to x_neg inout
     assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
@@ -87,7 +93,9 @@ module BallBalancer1D(
     assign vauxp6 = x_neg_driver;//input from x_neg inout
 
     //servomotor control signals
-    reg [10-1:0] motor_duty; // ratio = duty/1024
+    // ratio = duty/1024
+    // spare some bits to prevent overflow
+    reg [20-1:0] motor_duty_x; 
     
     // +1 to duty = +2 deg rotation
     localparam DEG_0 = 10'd25;
@@ -105,7 +113,7 @@ module BallBalancer1D(
 
     //xadc instantiation 
     // connect the eoc_out .den_in to get continuous conversion
-    xadc_wiz_0  XLXI_7 (
+    xadc_wiz_0  XADC_IP (
         .daddr_in(Address_in), //addresses can be found in the artix 7 XADC user guide DRP register space
         .dclk_in(CLK100MHZ), 
         .den_in(enable), 
@@ -141,32 +149,46 @@ module BallBalancer1D(
     
     //led visual dmm              
     always @(posedge(CLK100MHZ)) begin            
-        if(ready == 1'b1) begin
-            x_voltage <= data[15:6]; 
-            //it seems the the leftmost 10 bits  are our desired voltage read
-        end else begin
-            x_voltage <= x_voltage;
-        end
+        //it seems the the leftmost 10 bits  are our desired voltage read
+        x_voltage <= (ready && touchscreen_state==TOUCH_X) ? 
+                    data[15:6] : x_voltage;
+
+        // y_voltage <= (ready && touchscreen_state==TOUCH_Y) ?
+        //             data[15:6] : y_voltage;
     end
 
 
     //PID controller
+    localparam KP_X = 16'h1;
+    localparam KI_X = 16'h0;
+    localparam KD_X = 16'h0;
+    wire [8-1:0] pid_x_out;
+    PID_Controller pid_x (
+    .clk(CLK100MHZ),               
+    .rst(),                
+    .sp(X_mid),   // Setpoint (desired value)
+    .pv(x_voltage),   // Process variable (measured value)
+    .kp(KP_X),   // Proportional gain
+    .ki(KI_X),   // Integral gain
+    .kd(KD_X),   // Derivative gain
+    .out(pid_x_out)    // Output rotation degree (0~120)
+    );
 
     //output to actualizer (servomotor)
     always @(posedge CLK100MHZ) begin
-        //test
-        motor_duty <= x_voltage;
+        //obtain pwm duty from angle
+        motor_duty_x <= pid_x_out * 20'd67 / 20'd120 + DEG_0 ;
     end
     ServomotorPWM pwm_x (
         .clk(CLK100MHZ),
         .reset(),
-        .duty(motor_duty),
+        .duty(motor_duty_x[10-1:0]),
         .PWM(motorPWM_x)
     );
     // ServomotorPWM pwm_y (
     //     .clk(CLK100MHZ),
     //     .reset(),
-    //     .duty(motor_duty),
+    //     .duty(motor_duty_y),
     //     .PWM(motorPWM_y)
     // );
     

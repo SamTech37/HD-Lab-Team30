@@ -12,5 +12,6 @@ LAB_1/LAB_1.sim
 **/*.jou
 **/*.log
 
-
+# ignore all windows shortcuts
+**/*.lnk
 
