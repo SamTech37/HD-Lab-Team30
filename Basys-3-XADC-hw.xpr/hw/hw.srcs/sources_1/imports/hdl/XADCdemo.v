@@ -17,7 +17,7 @@ module BallBalancer2D(
     input CLK100MHZ,
     // JXA port analog input
 //    input vauxp6,
-    input vauxn6,
+    // input vauxn6,
     input vauxp7,
     input vauxn7,
     input vauxp15,
@@ -33,9 +33,9 @@ module BallBalancer2D(
     output [6:0] seg,
     // touchscreen drivers
     // inouts?
-    // input wire x_pos_driver, //ground
-     inout wire x_neg_driver, //power source for x-direction / input from y-direction
-    // input wire y_pos_driver, //ground
+    inout wire x_pos_driver, //ground
+    inout wire x_neg_driver, //power source for x-direction / input from y-direction
+    // inout wire y_pos_driver, //ground
     // inout wire y_neg_driver, //power source for y-direction  / input from x-direction
     
     output wire motorPWM_x, //for servomotor rotation angle control
@@ -90,9 +90,11 @@ module BallBalancer2D(
     //output to x_neg inout
     assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
     assign y_neg_driver = (touchscreen_state == TOUCH_Y) ? 1'b1 : 1'bz;
-    
-    wire vauxp6;
+    assign x_pos_driver = (touchscreen_state == TOUCH_X) ? 1'b0 : 1'bz;
+
+    wire vauxp6, vauxn6;
     assign vauxp6 = x_neg_driver;//input from x_neg inout
+    assign vauxn6 = x_pos_driver;//input from x_pos inout
 
     //servomotor control signals
     // ratio = duty/1024

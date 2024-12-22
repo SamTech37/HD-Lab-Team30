@@ -220,7 +220,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports vauxp7]
 #Sch name = XA4_P
 set_property IOSTANDARD LVCMOS33 [get_ports vauxp15]
 #Sch name = XA1_N
-set_property IOSTANDARD LVCMOS33 [get_ports vauxn6]
+##also vauxn6
+set_property IOSTANDARD LVCMOS33 [get_ports x_pos_driver]
 #Sch name = XA2_N
 set_property IOSTANDARD LVCMOS33 [get_ports vauxn14]
 #Sch name = XA3_N
@@ -233,7 +234,7 @@ set_property PACKAGE_PIN M1 [get_ports vauxn7]
 set_property PACKAGE_PIN L3 [get_ports vauxp14]
 set_property PACKAGE_PIN M3 [get_ports vauxn14]
 set_property PACKAGE_PIN J3 [get_ports x_neg_driver]
-set_property PACKAGE_PIN K3 [get_ports vauxn6]
+set_property PACKAGE_PIN K3 [get_ports x_pos_driver]
 set_property IOSTANDARD LVCMOS33 [get_ports vauxn15]
 
 
