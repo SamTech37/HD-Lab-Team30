@@ -16,16 +16,14 @@
 module BallBalancer2D(
     input CLK100MHZ,
     // JXA port analog input
-//    input vauxp6,
+    // input vauxp6,
     // input vauxn6,
     input vauxp7,
     input vauxn7,
-    input vauxp15,
-    input vauxn15,
+    // input vauxp15,
+    // input vauxn15,
     input vauxp14,
     input vauxn14,
-    input vp_in, // input for single channel XADC
-    input vn_in, // (not used)
     input  [15:0] sw,
     output [15:0] led,
     output [3:0] an,
@@ -35,8 +33,8 @@ module BallBalancer2D(
     // inouts?
     inout wire x_pos_driver, //ground
     inout wire x_neg_driver, //power source for x-direction / input from y-direction
-    // inout wire y_pos_driver, //ground
-    // inout wire y_neg_driver, //power source for y-direction  / input from x-direction
+    inout wire y_pos_driver, //ground
+    inout wire y_neg_driver, //power source for y-direction  / input from x-direction
     
     output wire motorPWM_x, //for servomotor rotation angle control
     output wire motorPWM_y
@@ -91,10 +89,13 @@ module BallBalancer2D(
     assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
     assign y_neg_driver = (touchscreen_state == TOUCH_Y) ? 1'b1 : 1'bz;
     assign x_pos_driver = (touchscreen_state == TOUCH_X) ? 1'b0 : 1'bz;
+    assign y_pos_driver = (touchscreen_state == TOUCH_Y) ? 1'b0 : 1'bz;
 
-    wire vauxp6, vauxn6;
+    wire vauxp6, vauxn6, vauxp15, vauxn15;
     assign vauxp6 = x_neg_driver;//input from x_neg inout
     assign vauxn6 = x_pos_driver;//input from x_pos inout
+    assign vauxp15 = y_neg_driver;//input from y_neg inout
+    assign vauxn15 = y_pos_driver;//input from y_pos inout
 
     //servomotor control signals
     // ratio = duty/1024
