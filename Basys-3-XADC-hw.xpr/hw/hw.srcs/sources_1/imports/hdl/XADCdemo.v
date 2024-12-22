@@ -67,10 +67,6 @@ module BallBalancer2D(
     wire [15:0] b2d_dout;
     wire b2d_done;
 
-    // x,y voltage input (use this directly as coordinates?)
-    // converted to 10-bit from JXA port analog input
-    reg [10-1:0] x_voltage, y_voltage;
-    assign led = x_voltage;
 
     //handle inouts
     localparam TOUCH_IDLE = 2'b00;
