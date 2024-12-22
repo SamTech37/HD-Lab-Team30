@@ -1,22 +1,19 @@
 `timescale 1ns / 1ps
-// code retrieved from 
+// template retrieved from 
 // https://digilent.com/reference/programmable-logic/basys-3/demos/xadc 
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-
 // 
 // Revision:
 // Revision 0.01 - tested this template
-// Revision 0.02 - testing XADC input
+// Revision 0.02 - testing JXA port XADC input from touchscreen 
 // Revision 0.03 - testing servomotor control
+// Revision 0.04 - testing PID controller
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
  
 
-module BallBalancer1D(
+module BallBalancer2D(
     input CLK100MHZ,
     // JXA port analog input
 //    input vauxp6,
@@ -82,10 +79,16 @@ module BallBalancer1D(
     reg [1:0] touchscreen_state = TOUCH_X;
     reg [1:0] next_touchscreen_state;
 
+    //adjustable parameters, depends on the output voltage
     parameter [10-1:0] X_max = 10'd460, X_mid = 10'd230, X_min=10'd10;
 
     //less than X    
     //parameter [10-1:0] Y_max = 10'd460, Y_mid = 10'd230, Y_min;
+
+    // x,y voltage input (use this directly as coordinates?)
+    // converted to 10-bit from JXA port analog input
+    reg [10-1:0] x_voltage, y_voltage;
+    assign led = (touchscreen_state == TOUCH_X) ? x_voltage : y_voltage;
 
     
     //output to x_neg inout
@@ -99,6 +102,7 @@ module BallBalancer1D(
     // ratio = duty/1024
     // spare some bits to prevent overflow
     reg [20-1:0] motor_duty_x; 
+    reg [20-1:0] motor_duty_y;
     
     // +1 to duty = +2 deg rotation
     localparam DEG_0 = 10'd25;
@@ -123,13 +127,13 @@ module BallBalancer1D(
         .di_in(0), 
         .dwe_in(0), 
         .busy_out(),                    
-        .vauxp6(vauxp6),
+        .vauxp6(vauxp6), //channel for reading y-direction
         .vauxn6(vauxn6),
         .vauxp7(vauxp7),
         .vauxn7(vauxn7),
         .vauxp14(vauxp14),
         .vauxn14(vauxn14),
-        .vauxp15(vauxp15),
+        .vauxp15(vauxp15), //channel for reading x-direction
         .vauxn15(vauxn15),
         // .vn_in(vn_in), 
         // .vp_in(vp_in), 
@@ -152,7 +156,7 @@ module BallBalancer1D(
     
     //led visual dmm              
     always @(posedge(CLK100MHZ)) begin            
-        //it seems the the leftmost 10 bits  are our desired voltage read
+        //it seems the leftmost 10 bits are the desired voltage readings
         x_voltage <= (ready && touchscreen_state==TOUCH_X) ? 
                     data[15:6] : x_voltage;
 
@@ -164,7 +168,7 @@ module BallBalancer1D(
     //PID controller
     localparam KP_X = 16'h1;
     localparam KI_X = 16'h0;
-    localparam KD_X = 16'h0;
+    localparam KD_X = 16'h3;
     wire [8-1:0] pid_x_out;
     wire [16-1:0] pid_x_gain;
     PID_Controller pid_x (
@@ -190,12 +194,12 @@ module BallBalancer1D(
         .duty(motor_duty_x[10-1:0]),
         .PWM(motorPWM_x)
     );
-    // ServomotorPWM pwm_y (
-    //     .clk(CLK100MHZ),
-    //     .reset(),
-    //     .duty(motor_duty_y),
-    //     .PWM(motorPWM_y)
-    // );
+    ServomotorPWM pwm_y (
+        .clk(CLK100MHZ),
+        .reset(),
+        .duty(motor_duty_y[10-1:0]),
+        .PWM(motorPWM_y)
+    );
     
 
     /* debug tools */
@@ -213,7 +217,7 @@ module BallBalancer1D(
                     b2d_state <= S_IDLE;
                 end else begin
                     b2d_start <= 1'b1;
-                    b2d_din <= showMode ? pid_x_out : data;
+                    b2d_din <= showMode ? {8'b0,pid_x_out} : data;
                     b2d_state <= S_CONVERSION;
                 end
             end else
