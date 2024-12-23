@@ -38,7 +38,7 @@ module BallBalancer2D(
     
     output wire motorPWM_x, //for servomotor rotation angle control
     output wire motorPWM_y,
-    output reg [6-1:0] transistor_base_driver
+    output reg [8-1:0] transistor_base_driver
 );
 
     wire slow_clock; //maybe use 100ns clock cycle in case some calculations takes longer
@@ -57,8 +57,6 @@ module BallBalancer2D(
     reg [1:0] b2d_state = S_IDLE;
     reg [15:0] sseg_data;
 	
-    wire showMode; //0 show x_voltage, 1 show y_voltage
-    assign showMode = sw[15];
 
 	//binary to decimal converter signals
     reg b2d_start;
@@ -83,35 +81,7 @@ module BallBalancer2D(
     // x,y voltage input (use this directly as coordinates?)
     // converted to 10-bit from JXA port analog input
     reg [10-1:0] x_voltage, y_voltage;
-    /*
-    // wire vauxp6, vauxn6, vauxp15, vauxn15;
-    // //T = 1, IO = 1'bz
-    // //T = 0, IO = out
-    // IOBUF x_neg (
-    //     .O(vauxp6), //analog in
-    //     .I(1'b1), //digital
-    //     .IO(x_neg_driver), //physical pin
-    //     .T(touchscreen_state == TOUCH_Y)  //tri-state control
-    // );
-    // IOBUF x_pos (
-    //     .O(vauxn6),
-    //     .I(1'b0),
-    //     .IO(x_pos_driver),
-    //     .T(touchscreen_state == TOUCH_Y)
-    // );
-    // IOBUF y_neg (
-    //     .O(vauxp15),
-    //     .I(1'b1),
-    //     .IO(y_neg_driver),
-    //     .T(touchscreen_state == TOUCH_X)
-    // );
-    // IOBUF y_pos (
-    //     .O(vauxn15),
-    //     .I(1'b0),
-    //     .IO(y_pos_driver),
-    //     .T(touchscreen_state == TOUCH_X)
-    // );
-    */
+    
     //servomotor control signals
     // ratio = duty/1024
     // spare some bits to prevent overflow
@@ -165,20 +135,20 @@ module BallBalancer2D(
         touchscreen_state <= next_touchscreen_state;
     end
     always @(*) begin
-        next_touchscreen_state = sw[14] ? TOUCH_Y : TOUCH_X;
+        next_touchscreen_state = sw[15] ? TOUCH_Y : TOUCH_X;
         case (touchscreen_state)
         TOUCH_X: begin
-            transistor_base_driver <= 6'b010101;
+            transistor_base_driver <= 8'b0110_0101;
             Address_in <= 8'h1f; // XA4/AD15
             // next_touchscreen_state = TOUCH_Y;
         end
         TOUCH_Y: begin
-            transistor_base_driver <= 6'b101010;
+            transistor_base_driver <= 8'b1001_1010;
             Address_in <= 8'h16; // XA1/AD6
             // next_touchscreen_state = TOUCH_X;
         end
         default: begin // TOUCH_IDLE
-            transistor_base_driver <= 6'b000000;
+            transistor_base_driver <= 8'b0000_0000;
             Address_in <= 8'h00;
             // next_touchscreen_state = TOUCH_X;
         end
@@ -249,7 +219,7 @@ module BallBalancer2D(
                     b2d_state <= S_IDLE;
                 end else begin
                     b2d_start <= 1'b1;
-                    b2d_din <= showMode ?  y_voltage : x_voltage;
+                    b2d_din <= data;
                     b2d_state <= S_CONVERSION;
                 end
             end else
