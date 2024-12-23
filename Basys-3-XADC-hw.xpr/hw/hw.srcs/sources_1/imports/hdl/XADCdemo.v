@@ -8,6 +8,7 @@
 // Revision 0.02 - testing JXA port XADC input from touchscreen 
 // Revision 0.03 - testing servomotor control
 // Revision 0.04 - testing PID controller
+// Revision 0.05 - no more inout, MUXing done by transistor
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -16,28 +17,28 @@
 module BallBalancer2D(
     input CLK100MHZ,
     // JXA port analog input
-    // input vauxp6,
-    // input vauxn6,
+    input vauxp6,
+    input vauxn6,
     input vauxp7,
     input vauxn7,
-    // input vauxp15,
-    // input vauxn15,
+    input vauxp15,
+    input vauxn15,
     input vauxp14,
     input vauxn14,
     input  [15:0] sw,
     output [15:0] led,
     output [3:0] an,
     output dp,
-    output [6:0] seg,
-    // touchscreen drivers
-    // inouts?
-    inout wire x_pos_driver, //ground
-    inout wire x_neg_driver, //power source for x-direction / input from y-direction
-    inout wire y_pos_driver, //ground
-    inout wire y_neg_driver, //power source for y-direction  / input from x-direction
+    output [7-1:0] seg,
+    // touchscreen drivers / analog input
+    // inout wire x_pos_driver, //ground
+    // inout wire x_neg_driver, //power source for x-direction / input from y-direction
+    // inout wire y_pos_driver, //ground
+    // inout wire y_neg_driver, //power source for y-direction  / input from x-direction
     
     output wire motorPWM_x, //for servomotor rotation angle control
-    output wire motorPWM_y
+    output wire motorPWM_y,
+    output reg [6-1:0] transistor_base_driver
 );
 
     wire slow_clock; //maybe use 100ns clock cycle in case some calculations takes longer
@@ -56,7 +57,7 @@ module BallBalancer2D(
     reg [1:0] b2d_state = S_IDLE;
     reg [15:0] sseg_data;
 	
-    wire showMode; //0 show voltage, 1 show pid content
+    wire showMode; //0 show x_voltage, 1 show y_voltage
     assign showMode = sw[15];
 
 	//binary to decimal converter signals
@@ -66,37 +67,51 @@ module BallBalancer2D(
     wire b2d_done;
 
 
-    //handle inouts
+    //handle direction of inouts
     localparam TOUCH_IDLE = 2'b00;
     localparam TOUCH_X = 2'b01;
     localparam TOUCH_Y = 2'b10;
-    reg [1:0] touchscreen_state = TOUCH_X;
+    reg [1:0] touchscreen_state = TOUCH_IDLE;
     reg [1:0] next_touchscreen_state;
 
     //adjustable parameters, depends on the output voltage
     parameter [10-1:0] X_max = 10'd460, X_mid = 10'd230, X_min=10'd10;
 
     //less than X    
-    //parameter [10-1:0] Y_max = 10'd460, Y_mid = 10'd230, Y_min;
+    // parameter [10-1:0] Y_max = 10'd408, Y_mid = 10'd315, Y_min=10'd120;
 
     // x,y voltage input (use this directly as coordinates?)
     // converted to 10-bit from JXA port analog input
     reg [10-1:0] x_voltage, y_voltage;
-    assign led = (touchscreen_state == TOUCH_X) ? x_voltage : y_voltage;
-
-    
-    //output to x_neg inout
-    assign x_neg_driver = (touchscreen_state == TOUCH_X) ? 1'b1 : 1'bz;
-    assign y_neg_driver = (touchscreen_state == TOUCH_Y) ? 1'b1 : 1'bz;
-    assign x_pos_driver = (touchscreen_state == TOUCH_X) ? 1'b0 : 1'bz;
-    assign y_pos_driver = (touchscreen_state == TOUCH_Y) ? 1'b0 : 1'bz;
-
-    wire vauxp6, vauxn6, vauxp15, vauxn15;
-    assign vauxp6 = x_neg_driver;//input from x_neg inout
-    assign vauxn6 = x_pos_driver;//input from x_pos inout
-    assign vauxp15 = y_neg_driver;//input from y_neg inout
-    assign vauxn15 = y_pos_driver;//input from y_pos inout
-
+    /*
+    // wire vauxp6, vauxn6, vauxp15, vauxn15;
+    // //T = 1, IO = 1'bz
+    // //T = 0, IO = out
+    // IOBUF x_neg (
+    //     .O(vauxp6), //analog in
+    //     .I(1'b1), //digital
+    //     .IO(x_neg_driver), //physical pin
+    //     .T(touchscreen_state == TOUCH_Y)  //tri-state control
+    // );
+    // IOBUF x_pos (
+    //     .O(vauxn6),
+    //     .I(1'b0),
+    //     .IO(x_pos_driver),
+    //     .T(touchscreen_state == TOUCH_Y)
+    // );
+    // IOBUF y_neg (
+    //     .O(vauxp15),
+    //     .I(1'b1),
+    //     .IO(y_neg_driver),
+    //     .T(touchscreen_state == TOUCH_X)
+    // );
+    // IOBUF y_pos (
+    //     .O(vauxn15),
+    //     .I(1'b0),
+    //     .IO(y_pos_driver),
+    //     .T(touchscreen_state == TOUCH_X)
+    // );
+    */
     //servomotor control signals
     // ratio = duty/1024
     // spare some bits to prevent overflow
@@ -143,24 +158,42 @@ module BallBalancer2D(
         .channel_out(),
         .drdy_out(ready)
     );
-    
-    always @(posedge(CLK100MHZ)) begin
-        case(sw[1:0])
-        0: Address_in <= 8'h16; // XA1/AD6
-        1: Address_in <= 8'h1e; // XA2/AD14
-        2: Address_in <= 8'h17; // XA3/AD7
-        3: Address_in <= 8'h1f; // XA4/AD15
+
+
+    //FSM for touchscreen driver
+    always @(posedge((CLK100MHZ))) begin
+        touchscreen_state <= next_touchscreen_state;
+    end
+    always @(*) begin
+        next_touchscreen_state = sw[14] ? TOUCH_Y : TOUCH_X;
+        case (touchscreen_state)
+        TOUCH_X: begin
+            transistor_base_driver <= 6'b010101;
+            Address_in <= 8'h1f; // XA4/AD15
+            // next_touchscreen_state = TOUCH_Y;
+        end
+        TOUCH_Y: begin
+            transistor_base_driver <= 6'b101010;
+            Address_in <= 8'h16; // XA1/AD6
+            // next_touchscreen_state = TOUCH_X;
+        end
+        default: begin // TOUCH_IDLE
+            transistor_base_driver <= 6'b000000;
+            Address_in <= 8'h00;
+            // next_touchscreen_state = TOUCH_X;
+        end
         endcase
     end
     
-    //led visual dmm              
+    //led visual dmm   
+    assign led = (touchscreen_state == TOUCH_X) ? x_voltage : y_voltage;
     always @(posedge(CLK100MHZ)) begin            
         //it seems the leftmost 10 bits are the desired voltage readings
         x_voltage <= (ready && touchscreen_state==TOUCH_X) ? 
                     data[15:6] : x_voltage;
 
-        // y_voltage <= (ready && touchscreen_state==TOUCH_Y) ?
-        //             data[15:6] : y_voltage;
+        y_voltage <= (ready && touchscreen_state==TOUCH_Y) ?
+                    data[15:6] : y_voltage;
     end
 
 
@@ -216,7 +249,7 @@ module BallBalancer2D(
                     b2d_state <= S_IDLE;
                 end else begin
                     b2d_start <= 1'b1;
-                    b2d_din <= showMode ? {8'b0,pid_x_out} : data;
+                    b2d_din <= showMode ?  y_voltage : x_voltage;
                     b2d_state <= S_CONVERSION;
                 end
             end else

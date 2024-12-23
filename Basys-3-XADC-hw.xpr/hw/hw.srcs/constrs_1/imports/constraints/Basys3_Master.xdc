@@ -128,20 +128,20 @@ set_property IOSTANDARD LVCMOS33 [get_ports {an[3]}]
 
 ##Pmod Header JA
 ##Sch name = JA1
-#set_property PACKAGE_PIN J1 [get_ports {JA[0]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[0]}]
+set_property PACKAGE_PIN J1 [get_ports {transistor_base_driver[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[0]}]
 ##Sch name = JA2
-#set_property PACKAGE_PIN L2 [get_ports {JA[1]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[1]}]
+set_property PACKAGE_PIN L2 [get_ports {transistor_base_driver[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[1]}]
 ##Sch name = JA3
-#set_property PACKAGE_PIN J2 [get_ports {JA[2]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[2]}]
+set_property PACKAGE_PIN J2 [get_ports {transistor_base_driver[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[2]}]
 ##Sch name = JA4
-#set_property PACKAGE_PIN G2 [get_ports {JA[3]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[3]}]
+set_property PACKAGE_PIN G2 [get_ports {transistor_base_driver[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[3]}]
 ##Sch name = JA7
-#set_property PACKAGE_PIN H1 [get_ports {JA[4]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[4]}]
+set_property PACKAGE_PIN H1 [get_ports {transistor_base_driver[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[4]}]
 ##Sch name = JA8
 #set_property PACKAGE_PIN K2 [get_ports {JA[5]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JA[5]}]
@@ -149,8 +149,8 @@ set_property IOSTANDARD LVCMOS33 [get_ports {an[3]}]
 #set_property PACKAGE_PIN H2 [get_ports {JA[6]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {JA[6]}]
 ##Sch name = JA10
-#set_property PACKAGE_PIN G3 [get_ports {JA[7]}]
-#set_property IOSTANDARD LVCMOS33 [get_ports {JA[7]}]
+set_property PACKAGE_PIN G3 [get_ports {transistor_base_driver[5]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {transistor_base_driver[5]}]
 
 
 
@@ -212,32 +212,32 @@ set_property IOSTANDARD LVCMOS33 [get_ports {motorPWM_y}]
 #Pmod Header JXADC
 #Sch name = XA1_P
 ##also vauxp6
-set_property IOSTANDARD LVCMOS33 [get_ports x_neg_driver ] 
+set_property IOSTANDARD LVCMOS33 [get_ports vauxp6 ] 
 #Sch name = XA2_P
 set_property IOSTANDARD LVCMOS33 [get_ports vauxp14]
 #Sch name = XA3_P
 set_property IOSTANDARD LVCMOS33 [get_ports vauxp7]
 #Sch name = XA4_P
 ##also vauxp15
-set_property IOSTANDARD LVCMOS33 [get_ports y_neg_driver]
+set_property IOSTANDARD LVCMOS33 [get_ports vauxp15]
 #Sch name = XA1_N
 ##also vauxn6
-set_property IOSTANDARD LVCMOS33 [get_ports x_pos_driver]
+set_property IOSTANDARD LVCMOS33 [get_ports vauxn6]
 #Sch name = XA2_N
 set_property IOSTANDARD LVCMOS33 [get_ports vauxn14]
 #Sch name = XA3_N
 set_property IOSTANDARD LVCMOS33 [get_ports vauxn7]
 #Sch name = XA4_N
-set_property IOSTANDARD LVCMOS33 [get_ports y_pos_driver]
+set_property IOSTANDARD LVCMOS33 [get_ports vauxn15]
 
-set_property PACKAGE_PIN N2 [get_ports y_neg_driver]
-set_property PACKAGE_PIN N1 [get_ports y_pos_driver]
+set_property PACKAGE_PIN N2 [get_ports vauxp15]
+set_property PACKAGE_PIN N1 [get_ports vauxn15]
 set_property PACKAGE_PIN M2 [get_ports vauxp7]
 set_property PACKAGE_PIN M1 [get_ports vauxn7]
 set_property PACKAGE_PIN L3 [get_ports vauxp14]
 set_property PACKAGE_PIN M3 [get_ports vauxn14]
-set_property PACKAGE_PIN J3 [get_ports x_neg_driver]
-set_property PACKAGE_PIN K3 [get_ports x_pos_driver]
+set_property PACKAGE_PIN J3 [get_ports vauxp6]
+set_property PACKAGE_PIN K3 [get_ports vauxn6]
 
 
 
