@@ -73,10 +73,10 @@ module BallBalancer2D(
     reg [1:0] next_touchscreen_state;
 
     //adjustable parameters, depends on the output voltage
-    parameter [10-1:0] X_max = 10'd460, X_mid = 10'd230, X_min=10'd10;
+    parameter [10-1:0] X_max = 10'd520, X_mid = 10'd210, X_min=10'd20;
 
     //less than X    
-    // parameter [10-1:0] Y_max = 10'd408, Y_mid = 10'd315, Y_min=10'd120;
+    parameter [10-1:0] Y_max = 10'd800, Y_mid = 10'd460, Y_min=10'd150;
 
     // x,y voltage input (use this directly as coordinates?)
     // converted to 10-bit from JXA port analog input
@@ -135,24 +135,31 @@ module BallBalancer2D(
         touchscreen_state <= next_touchscreen_state;
     end
     always @(*) begin
-        next_touchscreen_state = sw[15] ? TOUCH_Y : TOUCH_X;
-        case (touchscreen_state)
-        TOUCH_X: begin
-            transistor_base_driver <= 8'b0110_0101;
-            Address_in <= 8'h1f; // XA4/AD15
-            // next_touchscreen_state = TOUCH_Y;
+        if(sw[0]) begin
+         transistor_base_driver <= 8'b0000_0000;
+         next_touchscreen_state = TOUCH_IDLE;
+         Address_in <= 8'h00;
         end
-        TOUCH_Y: begin
-            transistor_base_driver <= 8'b1001_1010;
-            Address_in <= 8'h16; // XA1/AD6
-            // next_touchscreen_state = TOUCH_X;
+        else begin
+            next_touchscreen_state <= (sw[15])? TOUCH_Y : TOUCH_X;
+            case (touchscreen_state)
+            TOUCH_X: begin
+                transistor_base_driver <= 8'b0110_0101;
+                Address_in <= 8'h1f; // XA4/AD15
+//                 next_touchscreen_state = TOUCH_Y;
+            end
+            TOUCH_Y: begin
+                transistor_base_driver <= 8'b1001_1010;
+                Address_in <= 8'h16; // XA1/AD6
+//                 next_touchscreen_state = TOUCH_X;
+            end
+            default: begin // TOUCH_IDLE
+                transistor_base_driver <= 8'b0000_0000;
+                Address_in <= 8'h00;
+//                 next_touchscreen_state = TOUCH_X;
+            end
+            endcase 
         end
-        default: begin // TOUCH_IDLE
-            transistor_base_driver <= 8'b0000_0000;
-            Address_in <= 8'h00;
-            // next_touchscreen_state = TOUCH_X;
-        end
-        endcase
     end
     
     //led visual dmm   
@@ -168,9 +175,9 @@ module BallBalancer2D(
 
 
     //PID controller
-    localparam KP_X = 16'h1;
+    localparam KP_X = 16'h10;
     localparam KI_X = 16'h0;
-    localparam KD_X = 16'h3;
+    localparam KD_X = 16'h30;
     wire [8-1:0] pid_x_out;
     wire [16-1:0] pid_x_gain;
     PID_Controller pid_x (
@@ -185,10 +192,28 @@ module BallBalancer2D(
     .gain(pid_x_gain)
     );
 
+    localparam KP_Y = 16'h4;
+    localparam KI_Y = 16'h0;
+    localparam KD_Y = 16'h30;
+    wire [8-1:0] pid_y_out;
+    wire [16-1:0] pid_y_gain;
+    PID_Controller pid_y (
+    .clk(CLK100MHZ),
+    .rst(),
+    .sp(Y_mid),
+    .pv(y_voltage),
+    .kp(KP_Y),
+    .ki(KI_Y),
+    .kd(KD_Y),
+    .out(pid_y_out),
+    .gain(pid_y_gain)
+    );
+
     //output to actualizer (servomotor)
     always @(posedge CLK100MHZ) begin
         //obtain pwm duty from angle
         motor_duty_x <= pid_x_out * 20'd67 / 20'd120 + DEG_0 ;
+        motor_duty_y <= pid_y_out * 20'd67 / 20'd120 + DEG_0 ;
     end
     ServomotorPWM pwm_x (
         .clk(CLK100MHZ),

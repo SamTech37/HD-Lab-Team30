@@ -22,8 +22,8 @@ module PID_Controller (
     reg signed [31:0] total_gain;   // Total gain
     
 
-    localparam signed [16-1:0] MIN_GAIN = -(16'd500);
-    localparam signed [16-1:0] MAX_GAIN = 16'd500;
+    localparam signed [16-1:0] MIN_GAIN = -(16'd5000);
+    localparam signed [16-1:0] MAX_GAIN = 16'd5000;
     localparam signed [16-1:0] DEG_MIN = -(16'd60), DEG_MAX = 16'd60;
 
     always @(posedge clk or posedge rst) begin
